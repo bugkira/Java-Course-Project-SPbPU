@@ -1,0 +1,29 @@
+CREATE TABLE IF NOT EXISTS users (
+    user_id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS tasks (
+    task_id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    target_date TIMESTAMP NOT NULL,
+    user_id BIGINT NOT NULL,
+    is_completed BOOLEAN NOT NULL DEFAULT FALSE,
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+    notification_id BIGSERIAL PRIMARY KEY,
+    text TEXT NOT NULL,
+    date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    user_id BIGINT NOT NULL,
+    task_id BIGINT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (task_id) REFERENCES tasks(task_id)
+);
