@@ -29,6 +29,8 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 
 	// Flyway Migration
+	// Redis Cache
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.flywaydb:flyway-core'
 	runtimeOnly 'com.h2database:h2'
 	
