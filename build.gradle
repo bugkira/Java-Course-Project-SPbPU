@@ -30,6 +30,8 @@ dependencies {
 
 	// Flyway Migration
 	// Redis Cache
+	// RabbitMQ Messaging
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.flywaydb:flyway-core'
 	runtimeOnly 'com.h2database:h2'
