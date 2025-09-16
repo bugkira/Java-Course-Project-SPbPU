@@ -25,6 +25,11 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	
 	// H2 Database
+	// PostgreSQL Database
+	runtimeOnly 'org.postgresql:postgresql'
+
+	// Flyway Migration
+	implementation 'org.flywaydb:flyway-core'
 	runtimeOnly 'com.h2database:h2'
 	
 	// Swagger UI
