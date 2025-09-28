@@ -1,13 +1,14 @@
 package org.example.taskmanager.service;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.example.taskmanager.exception.EntityNotFoundException;
-import org.example.taskmanager.domain.TaskEntity;
-import org.example.taskmanager.repository.TaskDataRepository;
-
 import java.time.LocalDateTime;
 import java.util.List;
+
+import org.example.taskmanager.domain.TaskEntity;
+import org.example.taskmanager.exception.EntityNotFoundException;
+import org.example.taskmanager.repository.TaskDataRepository;
+import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -16,29 +17,29 @@ public class TaskManagementService {
     private final TaskDataRepository taskRepository;
 
     public List<TaskEntity> getAllUserTasks(Long ownerId) {
-        return taskRepository.findAllByOwnerAndNotRemoved(ownerId);
+        return taskRepository.findAllByOwnerId(ownerId);
     }
 
     public List<TaskEntity> getActiveTasks(Long ownerId) {
-        return taskRepository.findPendingByOwnerAndNotRemoved(ownerId);
+        return taskRepository.findPendingTasksByOwnerId(ownerId);
     }
 
-    public TaskEntity getTaskDetails(Long taskId) {
-        return taskRepository.findByIdAndNotRemoved(taskId)
+    public TaskEntity getTaskDetails(Long taskId, Long ownerId) {
+        return taskRepository.findByIdAndOwnerId(taskId, ownerId)
                 .orElseThrow(() -> new EntityNotFoundException("Task with id " + taskId + " not found"));
     }
 
     public TaskEntity addNewTask(TaskEntity task) {
         performTaskValidation(task);
         task.setCreateTime(LocalDateTime.now());
-        return taskRepository.store(task);
+        return taskRepository.save(task);
     }
 
-    public void removeTask(Long taskId) {
-        TaskEntity task = taskRepository.findByIdAndNotRemoved(taskId)
+    public void removeTask(Long taskId, Long ownerId) {
+        TaskEntity task = taskRepository.findByIdAndOwnerId(taskId, ownerId)
                 .orElseThrow(() -> new EntityNotFoundException("Task with id " + taskId + " not found"));
         task.setRemoved(true);
-        taskRepository.store(task);
+        taskRepository.save(task);
     }
 
     private void performTaskValidation(TaskEntity task) {

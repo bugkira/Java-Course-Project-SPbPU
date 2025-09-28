@@ -1,12 +1,13 @@
 package org.example.taskmanager.service;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.example.taskmanager.exception.EntityNotFoundException;
-import org.example.taskmanager.domain.UserEntity;
-import org.example.taskmanager.repository.UserDataRepository;
-
 import java.util.regex.Pattern;
+
+import org.example.taskmanager.domain.UserEntity;
+import org.example.taskmanager.exception.EntityNotFoundException;
+import org.example.taskmanager.repository.UserDataRepository;
+import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +21,7 @@ public class UserManagementService {
         verifyLoginUniqueness(user.getLogin());
         verifyEmailUniqueness(user.getEmailAddress());
 
-        return userRepository.store(user);
+        return userRepository.save(user);
     }
 
     public UserEntity authenticateUser(String login, String password) {
@@ -55,13 +56,13 @@ public class UserManagementService {
     }
 
     private void verifyLoginUniqueness(String login) {
-        if (userRepository.checkLoginExists(login)) {
+        if (userRepository.existsByLogin(login)) {
             throw new IllegalArgumentException("Login already exists");
         }
     }
 
     private void verifyEmailUniqueness(String email) {
-        if (userRepository.checkEmailExists(email)) {
+        if (userRepository.existsByEmailAddress(email)) {
             throw new IllegalArgumentException("Email already exists");
         }
     }

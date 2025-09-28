@@ -1,12 +1,14 @@
 package org.example.taskmanager.repository.memory;
 
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Repository;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.example.taskmanager.domain.UserEntity;
 import org.example.taskmanager.repository.UserDataRepository;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Repository;
 
 @Repository
 @Profile("inmemory")
@@ -15,7 +17,7 @@ public class MemoryUserRepository implements UserDataRepository {
     private final AtomicLong idGenerator = new AtomicLong(1);
 
     @Override
-    public UserEntity store(UserEntity user) {
+    public UserEntity save(UserEntity user) {
         if (user.getId() == null) {
             user.setId(idGenerator.getAndIncrement());
         }
@@ -31,14 +33,21 @@ public class MemoryUserRepository implements UserDataRepository {
     }
 
     @Override
-    public boolean checkLoginExists(String login) {
+    public Optional<UserEntity> findByEmailAddress(String emailAddress) {
+        return storage.values().stream()
+                .filter(user -> user.getEmailAddress().equals(emailAddress))
+                .findFirst();
+    }
+
+    @Override
+    public boolean existsByLogin(String login) {
         return storage.values().stream()
                 .anyMatch(user -> user.getLogin().equals(login));
     }
 
     @Override
-    public boolean checkEmailExists(String email) {
+    public boolean existsByEmailAddress(String emailAddress) {
         return storage.values().stream()
-                .anyMatch(user -> user.getEmailAddress().equals(email));
+                .anyMatch(user -> user.getEmailAddress().equals(emailAddress));
     }
 }

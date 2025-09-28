@@ -35,8 +35,8 @@ class MemoryUserRepositoryTest {
                 .build();
 
         // Store test data
-        repository.store(user1);
-        repository.store(user2);
+        repository.save(user1);
+        repository.save(user2);
     }
 
     @Test
@@ -80,7 +80,7 @@ class MemoryUserRepositoryTest {
                 .build();
 
         // When
-        UserEntity result = repository.store(newUser);
+        UserEntity result = repository.save(newUser);
 
         // Then
         assertNotNull(result.getId());
@@ -97,12 +97,12 @@ class MemoryUserRepositoryTest {
     @Test
     void testStore_UpdateUser() {
         // Given
-        UserEntity existingUser = repository.store(user1);
+        UserEntity existingUser = repository.save(user1);
         existingUser.setPasswordHash("updatedpassword");
         existingUser.setEmailAddress("updated@example.com");
 
         // When
-        UserEntity result = repository.store(existingUser);
+        UserEntity result = repository.save(existingUser);
 
         // Then
         assertEquals(existingUser.getId(), result.getId());
@@ -119,7 +119,7 @@ class MemoryUserRepositoryTest {
     @Test
     void testCheckLoginExists_ExistingLogin() {
         // When
-        boolean exists = repository.checkLoginExists("user1");
+        boolean exists = repository.existsByLogin("user1");
 
         // Then
         assertTrue(exists);
@@ -128,7 +128,7 @@ class MemoryUserRepositoryTest {
     @Test
     void testCheckLoginExists_NonExistentLogin() {
         // When
-        boolean exists = repository.checkLoginExists("nonexistent");
+        boolean exists = repository.existsByLogin("nonexistent");
 
         // Then
         assertFalse(exists);
@@ -137,7 +137,7 @@ class MemoryUserRepositoryTest {
     @Test
     void testCheckLoginExists_CaseSensitive() {
         // When
-        boolean exists = repository.checkLoginExists("USER1");
+        boolean exists = repository.existsByLogin("USER1");
 
         // Then
         assertFalse(exists);
@@ -146,7 +146,7 @@ class MemoryUserRepositoryTest {
     @Test
     void testCheckEmailExists_ExistingEmail() {
         // When
-        boolean exists = repository.checkEmailExists("user1@example.com");
+        boolean exists = repository.existsByEmailAddress("user1@example.com");
 
         // Then
         assertTrue(exists);
@@ -155,7 +155,7 @@ class MemoryUserRepositoryTest {
     @Test
     void testCheckEmailExists_NonExistentEmail() {
         // When
-        boolean exists = repository.checkEmailExists("nonexistent@example.com");
+        boolean exists = repository.existsByEmailAddress("nonexistent@example.com");
 
         // Then
         assertFalse(exists);
@@ -164,7 +164,7 @@ class MemoryUserRepositoryTest {
     @Test
     void testCheckEmailExists_CaseSensitive() {
         // When
-        boolean exists = repository.checkEmailExists("USER1@EXAMPLE.COM");
+        boolean exists = repository.existsByEmailAddress("USER1@EXAMPLE.COM");
 
         // Then
         assertFalse(exists);
@@ -186,8 +186,8 @@ class MemoryUserRepositoryTest {
                 .build();
 
         // When
-        UserEntity resultA = repository.store(userA);
-        UserEntity resultB = repository.store(userB);
+        UserEntity resultA = repository.save(userA);
+        UserEntity resultB = repository.save(userB);
 
         // Then
         assertNotNull(resultA.getId());
@@ -205,16 +205,16 @@ class MemoryUserRepositoryTest {
                 .build();
 
         // When
-        repository.store(user3);
+        repository.save(user3);
 
         // Then
-        assertTrue(repository.checkLoginExists("user1"));
-        assertTrue(repository.checkLoginExists("user2"));
-        assertTrue(repository.checkLoginExists("user3"));
+        assertTrue(repository.existsByLogin("user1"));
+        assertTrue(repository.existsByLogin("user2"));
+        assertTrue(repository.existsByLogin("user3"));
 
-        assertTrue(repository.checkEmailExists("user1@example.com"));
-        assertTrue(repository.checkEmailExists("user2@example.com"));
-        assertTrue(repository.checkEmailExists("user3@example.com"));
+        assertTrue(repository.existsByEmailAddress("user1@example.com"));
+        assertTrue(repository.existsByEmailAddress("user2@example.com"));
+        assertTrue(repository.existsByEmailAddress("user3@example.com"));
     }
 
     @Test
@@ -227,7 +227,7 @@ class MemoryUserRepositoryTest {
                 .build();
 
         // When
-        UserEntity result = repository.store(specialUser);
+        UserEntity result = repository.save(specialUser);
 
         // Then
         assertEquals("user.name+tag", result.getLogin());
@@ -235,7 +235,7 @@ class MemoryUserRepositoryTest {
         assertEquals("user.name+tag@example-domain.co.uk", result.getEmailAddress());
 
         // Verify it can be found
-        assertTrue(repository.checkLoginExists("user.name+tag"));
-        assertTrue(repository.checkEmailExists("user.name+tag@example-domain.co.uk"));
+        assertTrue(repository.existsByLogin("user.name+tag"));
+        assertTrue(repository.existsByEmailAddress("user.name+tag@example-domain.co.uk"));
     }
 }
