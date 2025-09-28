@@ -11,7 +11,7 @@
 
 ###  Реализовано
 - **REST Controllers**: TaskApiController, UserApiController, NotificationApiController
-- **Service Layer**: TaskManagementService, UserManagementService, NotificationManagementService  
+- **Service Layer**: TaskManagementService, UserManagementService, NotificationManagementService
 - **In-Memory Storage**: MemoryTaskRepository, MemoryUserRepository, MemoryNotificationRepository
 - **Domain Models**: TaskEntity, UserEntity, NotificationEntity с Lombok
 - **Exception Handling**: EntityNotFoundException, EntityAlreadyExistsException
@@ -72,7 +72,7 @@
 - **Spring Data JPA**: Полная интеграция с JPA/Hibernate
 - **Entity Mapping**: JPA аннотации (@Entity, @Id, @GeneratedValue, @Table)
 - **JPA Repositories**: TaskJpaRepository, UserJpaRepository, NotificationJpaRepository
-- **Profile Architecture**: 
+- **Profile Architecture**:
   - `inmemory` - для Step 1-2 (HashMap storage)
   - `h2` - для Step 3 (JPA + H2 database)
 - **Обратная совместимость**: Все предыдущие функции сохранены
@@ -95,6 +95,48 @@
 - **11 тестовых файлов**
 - **Все тесты проходят** ✅
 - **H2 консоль доступна** по адресу `/h2-console`
+
+</details>
+
+<details>
+<summary><b>Step 4: Docker Support</b></summary>
+
+### Цель
+Добавить поддержку Docker для контейнеризации приложения с автоматизированным тестированием
+
+### Реализованные функции
+- **Dockerfile**: многоступенчатая сборка Spring Boot приложения
+- **docker-compose.yml**: упрощенная оркестрация (только приложение с H2)
+- **Профиль docker**: конфигурация для контейнеризованного окружения
+- **Интеграционные тесты**: автоматизация тестирования API
+- **Замена curl команд**: полноценные автотесты вместо ручного тестирования
+
+### Архитектура
+- **Dockerfile**:
+  - Stage 1: Gradle сборка (gradle:jdk17)
+  - Stage 2: Runtime образ (eclipse-temurin:17-jre-jammy)
+- **application-docker.properties**: H2 база данных для Docker окружения
+- **Интеграционные тесты**:
+  - `BasicIntegrationTest` - основные API тесты
+  - `SimpleIntegrationTest` - простые сценарии
+  - `DockerIntegrationTest` - тесты для Docker профиля
+  - `H2ProfileIntegrationTest` - тесты для H2 профиля
+  - `EndToEndIntegrationTest` - полные end-to-end сценарии
+
+### Технологии
+- Docker & Docker Compose
+- H2 Database (in-memory для Step 4)
+- Spring Boot в контейнере
+- TestRestTemplate для интеграционных тестов
+- Spring Test Context
+
+### Результат
+- **Контейнеризованное приложение**
+- **H2 база данных в Docker**
+- **API работает в контейнерах**
+- **Автоматизированные интеграционные тесты**
+- **Замена ручных curl команд на автотесты**
+- **Многоэтапная Docker сборка**
 
 </details>
 
