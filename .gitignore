@@ -1,0 +1,102 @@
+# Compiled class files
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Log files
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# virtual machine crash logs
+hs_err_pid*
+replay_pid*
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# VS Code
+.vscode/
+
+# Gradle
+.gradle/
+build/
+bin/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Spring Boot
+application-*.properties
+application-*.yml
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Application logs
+application*.log
+
+Инструкция по реализации Step.md
+Частые ошибки.md
+Техническое задание.md
+gradlew
+gradle/wrapper/gradle-wrapper.properties
+src/main/resources/application.properties
+src/main/resources/application-docker.properties
+src/main/resources/application-inmemory.properties
+src/main/resources/application-postgresql.properties
+src/main/resources/application-rabbitmq.properties
+src/main/resources/application-kafka.properties
+src/main/resources/application-artemis.properties
+src/main/resources/application-pulsar.properties
+src/main/resources/application-activemq.properties
+src/main/resources/application-nats.properties
+src/main/resources/application-redis.properties
+src/main/resources/application-valkey.properties
