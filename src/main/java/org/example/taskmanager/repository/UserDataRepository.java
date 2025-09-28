@@ -5,8 +5,9 @@ import java.util.Optional;
 import org.example.taskmanager.domain.UserEntity;
 
 public interface UserDataRepository {
-    UserEntity store(UserEntity user);
+    UserEntity save(UserEntity user);
     Optional<UserEntity> findByLogin(String login);
-    boolean checkLoginExists(String login);
-    boolean checkEmailExists(String email);
+    Optional<UserEntity> findByEmailAddress(String emailAddress);
+    boolean existsByLogin(String login);
+    boolean existsByEmailAddress(String emailAddress);
 }

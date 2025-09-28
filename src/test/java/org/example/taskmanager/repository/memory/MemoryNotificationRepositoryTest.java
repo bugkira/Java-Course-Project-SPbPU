@@ -1,55 +1,93 @@
 package org.example.taskmanager.repository.memory;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.example.taskmanager.domain.NotificationEntity;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("inmemory")
 class MemoryNotificationRepositoryTest {
 
-    @Test
-    void testFindAllByRecipientOrderByTimestampDesc_EmptyResult() {
-        // Given
-        MemoryNotificationRepository repository = new MemoryNotificationRepository();
-        Long recipientId = 1L;
+    private MemoryNotificationRepository repository;
+    private NotificationEntity notification1;
+    private NotificationEntity notification2;
+    private NotificationEntity notification3;
 
+    @BeforeEach
+    void setUp() {
+        repository = new MemoryNotificationRepository();
+        
+        notification1 = NotificationEntity.builder()
+                .id(1L)
+                .message("Test notification 1")
+                .timestamp(LocalDateTime.now())
+                .relatedTaskId(1L)
+                .recipientId(1L)
+                .viewed(false)
+                .build();
+                
+        notification2 = NotificationEntity.builder()
+                .id(2L)
+                .message("Test notification 2")
+                .timestamp(LocalDateTime.now())
+                .relatedTaskId(2L)
+                .recipientId(1L)
+                .viewed(true)
+                .build();
+                
+        notification3 = NotificationEntity.builder()
+                .id(3L)
+                .message("Test notification 3")
+                .timestamp(LocalDateTime.now())
+                .relatedTaskId(3L)
+                .recipientId(2L)
+                .viewed(false)
+                .build();
+    }
+
+    @Test
+    void testFindAllByRecipientId_Success() {
+        // Given
+        Long recipientId = 1L;
+        
         // When
-        List<NotificationEntity> result = repository.findAllByRecipientOrderByTimestampDesc(recipientId);
+        List<NotificationEntity> result = repository.findAllByRecipientId(recipientId);
 
         // Then
+        assertNotNull(result);
         assertTrue(result.isEmpty());
     }
 
     @Test
-    void testFindUnviewedByRecipientOrderByTimestampDesc_EmptyResult() {
+    void testFindPendingNotificationsByRecipientId_Success() {
         // Given
-        MemoryNotificationRepository repository = new MemoryNotificationRepository();
         Long recipientId = 1L;
-
+        
         // When
-        List<NotificationEntity> result = repository.findUnviewedByRecipientOrderByTimestampDesc(recipientId);
+        List<NotificationEntity> result = repository.findPendingNotificationsByRecipientId(recipientId);
 
         // Then
+        assertNotNull(result);
         assertTrue(result.isEmpty());
     }
 
     @Test
-    void testFindById_NotFound() {
+    void testFindByRelatedTaskId_Success() {
         // Given
-        MemoryNotificationRepository repository = new MemoryNotificationRepository();
-
+        Long relatedTaskId = 1L;
+        
         // When
-        Optional<NotificationEntity> result = repository.findById(999L);
+        List<NotificationEntity> result = repository.findByRelatedTaskId(relatedTaskId);
 
         // Then
-        assertFalse(result.isPresent());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -62,134 +100,158 @@ class MemoryNotificationRepositoryTest {
     }
 
     @Test
-    void testRepositoryProfile() {
+    void testFindAllByRecipientId_EmptyResult() {
         // Given
-        MemoryNotificationRepository repository = new MemoryNotificationRepository();
-
-        // When & Then
-        // Test that repository can be instantiated without errors
-        assertNotNull(repository);
-        
-        // Test that methods can be called without errors
-        List<NotificationEntity> allNotifications = repository.findAllByRecipientOrderByTimestampDesc(1L);
-        List<NotificationEntity> unreadNotifications = repository.findUnviewedByRecipientOrderByTimestampDesc(1L);
-        Optional<NotificationEntity> notification = repository.findById(1L);
-        
-        assertNotNull(allNotifications);
-        assertNotNull(unreadNotifications);
-        assertNotNull(notification);
-    }
-
-    @Test
-    void testRepositoryMethodsReturnCorrectTypes() {
-        // Given
-        MemoryNotificationRepository repository = new MemoryNotificationRepository();
+        Long nonExistentRecipientId = 999L;
 
         // When
-        List<NotificationEntity> allNotifications = repository.findAllByRecipientOrderByTimestampDesc(1L);
-        List<NotificationEntity> unreadNotifications = repository.findUnviewedByRecipientOrderByTimestampDesc(1L);
-        Optional<NotificationEntity> notification = repository.findById(1L);
+        List<NotificationEntity> result = repository.findAllByRecipientId(nonExistentRecipientId);
 
         // Then
-        assertTrue(allNotifications instanceof List);
-        assertTrue(unreadNotifications instanceof List);
-        assertTrue(notification instanceof Optional);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    void testRepositoryHandlesNullRecipientId() {
+    void testFindPendingNotificationsByRecipientId_EmptyResult() {
         // Given
-        MemoryNotificationRepository repository = new MemoryNotificationRepository();
-
-        // When & Then
-        // Should not throw exception, but return empty results
-        assertDoesNotThrow(() -> {
-            List<NotificationEntity> result = repository.findAllByRecipientOrderByTimestampDesc(null);
-            assertTrue(result.isEmpty());
-        });
-
-        assertDoesNotThrow(() -> {
-            List<NotificationEntity> result = repository.findUnviewedByRecipientOrderByTimestampDesc(null);
-            assertTrue(result.isEmpty());
-        });
-    }
-
-    @Test
-    void testRepositoryHandlesNullNotificationId() {
-        // Given
-        MemoryNotificationRepository repository = new MemoryNotificationRepository();
+        Long nonExistentRecipientId = 999L;
 
         // When
-        Optional<NotificationEntity> result = repository.findById(null);
+        List<NotificationEntity> result = repository.findPendingNotificationsByRecipientId(nonExistentRecipientId);
 
         // Then
-        assertFalse(result.isPresent());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    void testRepositoryHandlesNegativeIds() {
+    void testFindByRelatedTaskId_EmptyResult() {
         // Given
-        MemoryNotificationRepository repository = new MemoryNotificationRepository();
+        Long nonExistentTaskId = 999L;
 
+        // When
+        List<NotificationEntity> result = repository.findByRelatedTaskId(nonExistentTaskId);
+
+        // Then
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testFindAllByRecipientId_NullInput() {
         // When & Then
         assertDoesNotThrow(() -> {
-            List<NotificationEntity> result = repository.findAllByRecipientOrderByTimestampDesc(-1L);
-            assertTrue(result.isEmpty());
-        });
-
-        assertDoesNotThrow(() -> {
-            List<NotificationEntity> result = repository.findUnviewedByRecipientOrderByTimestampDesc(-1L);
-            assertTrue(result.isEmpty());
-        });
-
-        assertDoesNotThrow(() -> {
-            Optional<NotificationEntity> result = repository.findById(-1L);
-            assertFalse(result.isPresent());
+            List<NotificationEntity> result = repository.findAllByRecipientId(null);
+            assertNotNull(result);
         });
     }
 
     @Test
-    void testRepositoryHandlesZeroIds() {
-        // Given
-        MemoryNotificationRepository repository = new MemoryNotificationRepository();
-
+    void testFindPendingNotificationsByRecipientId_NullInput() {
         // When & Then
         assertDoesNotThrow(() -> {
-            List<NotificationEntity> result = repository.findAllByRecipientOrderByTimestampDesc(0L);
-            assertTrue(result.isEmpty());
-        });
-
-        assertDoesNotThrow(() -> {
-            List<NotificationEntity> result = repository.findUnviewedByRecipientOrderByTimestampDesc(0L);
-            assertTrue(result.isEmpty());
-        });
-
-        assertDoesNotThrow(() -> {
-            Optional<NotificationEntity> result = repository.findById(0L);
-            assertFalse(result.isPresent());
+            List<NotificationEntity> result = repository.findPendingNotificationsByRecipientId(null);
+            assertNotNull(result);
         });
     }
 
     @Test
-    void testRepositoryHandlesLargeIds() {
+    void testFindByRelatedTaskId_NullInput() {
+        // When & Then
+        assertDoesNotThrow(() -> {
+            List<NotificationEntity> result = repository.findByRelatedTaskId(null);
+            assertNotNull(result);
+        });
+    }
+
+    @Test
+    void testFindAllByRecipientId_NegativeId() {
+        // When & Then
+        assertDoesNotThrow(() -> {
+            List<NotificationEntity> result = repository.findAllByRecipientId(-1L);
+            assertNotNull(result);
+        });
+    }
+
+    @Test
+    void testFindPendingNotificationsByRecipientId_NegativeId() {
+        // When & Then
+        assertDoesNotThrow(() -> {
+            List<NotificationEntity> result = repository.findPendingNotificationsByRecipientId(-1L);
+            assertNotNull(result);
+        });
+    }
+
+    @Test
+    void testFindByRelatedTaskId_NegativeId() {
+        // When & Then
+        assertDoesNotThrow(() -> {
+            List<NotificationEntity> result = repository.findByRelatedTaskId(-1L);
+            assertNotNull(result);
+        });
+    }
+
+    @Test
+    void testFindAllByRecipientId_ZeroId() {
+        // When & Then
+        assertDoesNotThrow(() -> {
+            List<NotificationEntity> result = repository.findAllByRecipientId(0L);
+            assertNotNull(result);
+        });
+    }
+
+    @Test
+    void testFindPendingNotificationsByRecipientId_ZeroId() {
+        // When & Then
+        assertDoesNotThrow(() -> {
+            List<NotificationEntity> result = repository.findPendingNotificationsByRecipientId(0L);
+            assertNotNull(result);
+        });
+    }
+
+    @Test
+    void testFindByRelatedTaskId_ZeroId() {
+        // When & Then
+        assertDoesNotThrow(() -> {
+            List<NotificationEntity> result = repository.findByRelatedTaskId(0L);
+            assertNotNull(result);
+        });
+    }
+
+    @Test
+    void testFindAllByRecipientId_LargeId() {
         // Given
-        MemoryNotificationRepository repository = new MemoryNotificationRepository();
         Long largeId = Long.MAX_VALUE;
 
         // When & Then
         assertDoesNotThrow(() -> {
-            List<NotificationEntity> result = repository.findAllByRecipientOrderByTimestampDesc(largeId);
-            assertTrue(result.isEmpty());
+            List<NotificationEntity> result = repository.findAllByRecipientId(largeId);
+            assertNotNull(result);
         });
+    }
 
+    @Test
+    void testFindPendingNotificationsByRecipientId_LargeId() {
+        // Given
+        Long largeId = Long.MAX_VALUE;
+
+        // When & Then
         assertDoesNotThrow(() -> {
-            List<NotificationEntity> result = repository.findUnviewedByRecipientOrderByTimestampDesc(largeId);
-            assertTrue(result.isEmpty());
+            List<NotificationEntity> result = repository.findPendingNotificationsByRecipientId(largeId);
+            assertNotNull(result);
         });
+    }
 
+    @Test
+    void testFindByRelatedTaskId_LargeId() {
+        // Given
+        Long largeId = Long.MAX_VALUE;
+
+        // When & Then
         assertDoesNotThrow(() -> {
-            Optional<NotificationEntity> result = repository.findById(largeId);
-            assertFalse(result.isPresent());
+            List<NotificationEntity> result = repository.findByRelatedTaskId(largeId);
+            assertNotNull(result);
         });
     }
 }

@@ -79,80 +79,80 @@ class TaskManagementServiceTest {
     void testGetAllUserTasks_Success() {
         // Given
         List<TaskEntity> expectedTasks = Arrays.asList(validTask, completedTask);
-        when(taskRepository.findAllByOwnerAndNotRemoved(testOwnerId)).thenReturn(expectedTasks);
+        when(taskRepository.findAllByOwnerId(testOwnerId)).thenReturn(expectedTasks);
 
         // When
         List<TaskEntity> actualTasks = taskService.getAllUserTasks(testOwnerId);
 
         // Then
         assertEquals(expectedTasks, actualTasks);
-        verify(taskRepository).findAllByOwnerAndNotRemoved(testOwnerId);
+        verify(taskRepository).findAllByOwnerId(testOwnerId);
     }
 
     @Test
     void testGetAllUserTasks_EmptyResult() {
         // Given
-        when(taskRepository.findAllByOwnerAndNotRemoved(testOwnerId)).thenReturn(Collections.emptyList());
+        when(taskRepository.findAllByOwnerId(testOwnerId)).thenReturn(Collections.emptyList());
 
         // When
         List<TaskEntity> actualTasks = taskService.getAllUserTasks(testOwnerId);
 
         // Then
         assertTrue(actualTasks.isEmpty());
-        verify(taskRepository).findAllByOwnerAndNotRemoved(testOwnerId);
+        verify(taskRepository).findAllByOwnerId(testOwnerId);
     }
 
     @Test
     void testGetActiveTasks_Success() {
         // Given
         List<TaskEntity> expectedTasks = Collections.singletonList(validTask);
-        when(taskRepository.findPendingByOwnerAndNotRemoved(testOwnerId)).thenReturn(expectedTasks);
+        when(taskRepository.findPendingTasksByOwnerId(testOwnerId)).thenReturn(expectedTasks);
 
         // When
         List<TaskEntity> actualTasks = taskService.getActiveTasks(testOwnerId);
 
         // Then
         assertEquals(expectedTasks, actualTasks);
-        verify(taskRepository).findPendingByOwnerAndNotRemoved(testOwnerId);
+        verify(taskRepository).findPendingTasksByOwnerId(testOwnerId);
     }
 
     @Test
     void testGetActiveTasks_EmptyResult() {
         // Given
-        when(taskRepository.findPendingByOwnerAndNotRemoved(testOwnerId)).thenReturn(Collections.emptyList());
+        when(taskRepository.findPendingTasksByOwnerId(testOwnerId)).thenReturn(Collections.emptyList());
 
         // When
         List<TaskEntity> actualTasks = taskService.getActiveTasks(testOwnerId);
 
         // Then
         assertTrue(actualTasks.isEmpty());
-        verify(taskRepository).findPendingByOwnerAndNotRemoved(testOwnerId);
+        verify(taskRepository).findPendingTasksByOwnerId(testOwnerId);
     }
 
     @Test
     void testGetTaskDetails_Success() {
         // Given
-        when(taskRepository.findByIdAndNotRemoved(testTaskId)).thenReturn(Optional.of(validTask));
+        when(taskRepository.findByIdAndOwnerId(testTaskId, testOwnerId)).thenReturn(Optional.of(validTask));
 
         // When
-        TaskEntity actualTask = taskService.getTaskDetails(testTaskId);
+        TaskEntity actualTask = taskService.getTaskDetails(testTaskId, testOwnerId);
 
         // Then
         assertEquals(validTask, actualTask);
-        verify(taskRepository).findByIdAndNotRemoved(testTaskId);
+        verify(taskRepository).findByIdAndOwnerId(testTaskId, testOwnerId);
     }
 
     @Test
     void testGetTaskDetails_TaskNotFound() {
         // Given
-        when(taskRepository.findByIdAndNotRemoved(testTaskId)).thenReturn(Optional.empty());
+        when(taskRepository.findByIdAndOwnerId(testTaskId, testOwnerId)).thenReturn(Optional.empty());
 
         // When & Then
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, 
-            () -> taskService.getTaskDetails(testTaskId));
+            () -> taskService.getTaskDetails(testTaskId, testOwnerId));
         
         assertEquals("Task with id " + testTaskId + " not found", exception.getMessage());
-        verify(taskRepository).findByIdAndNotRemoved(testTaskId);
+        verify(taskRepository).findByIdAndOwnerId(testTaskId, testOwnerId);
     }
 
     @Test
@@ -175,7 +175,7 @@ class TaskManagementServiceTest {
                 .removed(false)
                 .build();
 
-        when(taskRepository.store(any(TaskEntity.class))).thenReturn(savedTask);
+        when(taskRepository.save(any(TaskEntity.class))).thenReturn(savedTask);
 
         // When
         TaskEntity result = taskService.addNewTask(newTask);
@@ -185,7 +185,7 @@ class TaskManagementServiceTest {
         assertEquals(testTaskId, result.getId());
         assertEquals("New Task", result.getName());
         assertNotNull(result.getCreateTime());
-        verify(taskRepository).store(any(TaskEntity.class));
+        verify(taskRepository).save(any(TaskEntity.class));
     }
 
     @Test
@@ -203,7 +203,7 @@ class TaskManagementServiceTest {
             () -> taskService.addNewTask(invalidTask));
         
         assertEquals("Task name must not be empty", exception.getMessage());
-        verify(taskRepository, never()).store(any(TaskEntity.class));
+        verify(taskRepository, never()).save(any(TaskEntity.class));
     }
 
     @Test
@@ -221,7 +221,7 @@ class TaskManagementServiceTest {
             () -> taskService.addNewTask(invalidTask));
         
         assertEquals("Task details must not be empty", exception.getMessage());
-        verify(taskRepository, never()).store(any(TaskEntity.class));
+        verify(taskRepository, never()).save(any(TaskEntity.class));
     }
 
     @Test
@@ -239,34 +239,34 @@ class TaskManagementServiceTest {
             () -> taskService.addNewTask(invalidTask));
         
         assertEquals("Task due date cannot be in the past", exception.getMessage());
-        verify(taskRepository, never()).store(any(TaskEntity.class));
+        verify(taskRepository, never()).save(any(TaskEntity.class));
     }
 
     @Test
     void testRemoveTask_Success() {
         // Given
-        when(taskRepository.findByIdAndNotRemoved(testTaskId)).thenReturn(Optional.of(validTask));
-        when(taskRepository.store(any(TaskEntity.class))).thenReturn(validTask);
+        when(taskRepository.findByIdAndOwnerId(testTaskId, testOwnerId)).thenReturn(Optional.of(validTask));
+        when(taskRepository.save(any(TaskEntity.class))).thenReturn(validTask);
 
         // When
-        taskService.removeTask(testTaskId);
+        taskService.removeTask(testTaskId, testOwnerId);
 
         // Then
-        verify(taskRepository).findByIdAndNotRemoved(testTaskId);
-        verify(taskRepository).store(any(TaskEntity.class));
+        verify(taskRepository).findByIdAndOwnerId(testTaskId, testOwnerId);
+        verify(taskRepository).save(any(TaskEntity.class));
     }
 
     @Test
     void testRemoveTask_TaskNotFound() {
         // Given
-        when(taskRepository.findByIdAndNotRemoved(testTaskId)).thenReturn(Optional.empty());
+        when(taskRepository.findByIdAndOwnerId(testTaskId, testOwnerId)).thenReturn(Optional.empty());
 
         // When & Then
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-            () -> taskService.removeTask(testTaskId));
+            () -> taskService.removeTask(testTaskId, testOwnerId));
         
         assertEquals("Task with id " + testTaskId + " not found", exception.getMessage());
-        verify(taskRepository).findByIdAndNotRemoved(testTaskId);
-        verify(taskRepository, never()).store(any(TaskEntity.class));
+        verify(taskRepository).findByIdAndOwnerId(testTaskId, testOwnerId);
+        verify(taskRepository, never()).save(any(TaskEntity.class));
     }
 }

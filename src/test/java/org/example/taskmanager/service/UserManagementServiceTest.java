@@ -52,18 +52,18 @@ class UserManagementServiceTest {
     @Test
     void testCreateUserAccount_Success() {
         // Given
-        when(userRepository.checkLoginExists("testuser")).thenReturn(false);
-        when(userRepository.checkEmailExists("test@example.com")).thenReturn(false);
-        when(userRepository.store(any(UserEntity.class))).thenReturn(validUser);
+        when(userRepository.existsByLogin("testuser")).thenReturn(false);
+        when(userRepository.existsByEmailAddress("test@example.com")).thenReturn(false);
+        when(userRepository.save(any(UserEntity.class))).thenReturn(validUser);
 
         // When
         UserEntity result = userService.createUserAccount(validUser);
 
         // Then
         assertEquals(validUser, result);
-        verify(userRepository).checkLoginExists("testuser");
-        verify(userRepository).checkEmailExists("test@example.com");
-        verify(userRepository).store(any(UserEntity.class));
+        verify(userRepository).existsByLogin("testuser");
+        verify(userRepository).existsByEmailAddress("test@example.com");
+        verify(userRepository).save(any(UserEntity.class));
     }
 
     @Test
@@ -80,7 +80,7 @@ class UserManagementServiceTest {
             () -> userService.createUserAccount(invalidUser));
         
         assertEquals("Login must not be empty", exception.getMessage());
-        verify(userRepository, never()).store(any(UserEntity.class));
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test
@@ -97,7 +97,7 @@ class UserManagementServiceTest {
             () -> userService.createUserAccount(invalidUser));
         
         assertEquals("Login must be at least 3 characters long", exception.getMessage());
-        verify(userRepository, never()).store(any(UserEntity.class));
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test
@@ -114,7 +114,7 @@ class UserManagementServiceTest {
             () -> userService.createUserAccount(invalidUser));
         
         assertEquals("Password must not be empty", exception.getMessage());
-        verify(userRepository, never()).store(any(UserEntity.class));
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test
@@ -131,7 +131,7 @@ class UserManagementServiceTest {
             () -> userService.createUserAccount(invalidUser));
         
         assertEquals("Password must be at least 6 characters long", exception.getMessage());
-        verify(userRepository, never()).store(any(UserEntity.class));
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test
@@ -148,7 +148,7 @@ class UserManagementServiceTest {
             () -> userService.createUserAccount(invalidUser));
         
         assertEquals("Email must not be empty", exception.getMessage());
-        verify(userRepository, never()).store(any(UserEntity.class));
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test
@@ -165,38 +165,38 @@ class UserManagementServiceTest {
             () -> userService.createUserAccount(invalidUser));
         
         assertEquals("Invalid email format", exception.getMessage());
-        verify(userRepository, never()).store(any(UserEntity.class));
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test
     void testCreateUserAccount_DuplicateLogin() {
         // Given
-        when(userRepository.checkLoginExists("testuser")).thenReturn(true);
+        when(userRepository.existsByLogin("testuser")).thenReturn(true);
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> userService.createUserAccount(validUser));
         
         assertEquals("Login already exists", exception.getMessage());
-        verify(userRepository).checkLoginExists("testuser");
-        verify(userRepository, never()).checkEmailExists(anyString());
-        verify(userRepository, never()).store(any(UserEntity.class));
+        verify(userRepository).existsByLogin("testuser");
+        verify(userRepository, never()).existsByEmailAddress(anyString());
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test
     void testCreateUserAccount_DuplicateEmail() {
         // Given
-        when(userRepository.checkLoginExists("testuser")).thenReturn(false);
-        when(userRepository.checkEmailExists("test@example.com")).thenReturn(true);
+        when(userRepository.existsByLogin("testuser")).thenReturn(false);
+        when(userRepository.existsByEmailAddress("test@example.com")).thenReturn(true);
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> userService.createUserAccount(validUser));
         
         assertEquals("Email already exists", exception.getMessage());
-        verify(userRepository).checkLoginExists("testuser");
-        verify(userRepository).checkEmailExists("test@example.com");
-        verify(userRepository, never()).store(any(UserEntity.class));
+        verify(userRepository).existsByLogin("testuser");
+        verify(userRepository).existsByEmailAddress("test@example.com");
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test
@@ -247,16 +247,16 @@ class UserManagementServiceTest {
                 .emailAddress("valid@example.com")
                 .build();
 
-        when(userRepository.checkLoginExists("validuser")).thenReturn(false);
-        when(userRepository.checkEmailExists("valid@example.com")).thenReturn(false);
-        when(userRepository.store(any(UserEntity.class))).thenReturn(validUser);
+        when(userRepository.existsByLogin("validuser")).thenReturn(false);
+        when(userRepository.existsByEmailAddress("valid@example.com")).thenReturn(false);
+        when(userRepository.save(any(UserEntity.class))).thenReturn(validUser);
 
         // When
         UserEntity result = userService.createUserAccount(validUser);
 
         // Then
         assertNotNull(result);
-        verify(userRepository).store(any(UserEntity.class));
+        verify(userRepository).save(any(UserEntity.class));
     }
 
     @Test
@@ -276,9 +276,9 @@ class UserManagementServiceTest {
                     .emailAddress(email)
                     .build();
 
-            when(userRepository.checkLoginExists("testuser")).thenReturn(false);
-            when(userRepository.checkEmailExists(email)).thenReturn(false);
-            when(userRepository.store(any(UserEntity.class))).thenReturn(user);
+            when(userRepository.existsByLogin("testuser")).thenReturn(false);
+            when(userRepository.existsByEmailAddress(email)).thenReturn(false);
+            when(userRepository.save(any(UserEntity.class))).thenReturn(user);
 
             // When & Then
             assertDoesNotThrow(() -> userService.createUserAccount(user));

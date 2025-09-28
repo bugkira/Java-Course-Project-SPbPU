@@ -68,16 +68,16 @@ class MemoryTaskRepositoryTest {
                 .build();
 
         // Store test data
-        repository.store(task1);
-        repository.store(task2);
-        repository.store(task3);
-        repository.store(removedTask);
+        repository.save(task1);
+        repository.save(task2);
+        repository.save(task3);
+        repository.save(removedTask);
     }
 
     @Test
     void testFindAllByOwnerAndNotRemoved_Success() {
         // When
-        List<TaskEntity> result = repository.findAllByOwnerAndNotRemoved(ownerId1);
+        List<TaskEntity> result = repository.findAllByOwnerId(ownerId1);
 
         // Then
         assertEquals(2, result.size());
@@ -92,7 +92,7 @@ class MemoryTaskRepositoryTest {
         Long nonExistentOwnerId = 999L;
 
         // When
-        List<TaskEntity> result = repository.findAllByOwnerAndNotRemoved(nonExistentOwnerId);
+        List<TaskEntity> result = repository.findAllByOwnerId(nonExistentOwnerId);
 
         // Then
         assertTrue(result.isEmpty());
@@ -101,7 +101,7 @@ class MemoryTaskRepositoryTest {
     @Test
     void testFindAllByOwnerAndNotRemoved_DifferentOwner() {
         // When
-        List<TaskEntity> result = repository.findAllByOwnerAndNotRemoved(ownerId2);
+        List<TaskEntity> result = repository.findAllByOwnerId(ownerId2);
 
         // Then
         assertEquals(1, result.size());
@@ -111,7 +111,7 @@ class MemoryTaskRepositoryTest {
     @Test
     void testFindPendingByOwnerAndNotRemoved_Success() {
         // When
-        List<TaskEntity> result = repository.findPendingByOwnerAndNotRemoved(ownerId1);
+        List<TaskEntity> result = repository.findPendingTasksByOwnerId(ownerId1);
 
         // Then
         assertEquals(1, result.size());
@@ -126,7 +126,7 @@ class MemoryTaskRepositoryTest {
         Long nonExistentOwnerId = 999L;
 
         // When
-        List<TaskEntity> result = repository.findPendingByOwnerAndNotRemoved(nonExistentOwnerId);
+        List<TaskEntity> result = repository.findPendingTasksByOwnerId(nonExistentOwnerId);
 
         // Then
         assertTrue(result.isEmpty());
@@ -143,10 +143,10 @@ class MemoryTaskRepositoryTest {
                 .finished(true)
                 .removed(false)
                 .build();
-        repository.store(finishedTask);
+        repository.save(finishedTask);
 
         // When
-        List<TaskEntity> result = repository.findPendingByOwnerAndNotRemoved(ownerId1);
+        List<TaskEntity> result = repository.findPendingTasksByOwnerId(ownerId1);
 
         // Then
         assertEquals(1, result.size()); // Only task1 is pending
@@ -159,7 +159,7 @@ class MemoryTaskRepositoryTest {
         Long taskId = task1.getId();
 
         // When
-        Optional<TaskEntity> result = repository.findByIdAndNotRemoved(taskId);
+        Optional<TaskEntity> result = repository.findByIdAndOwnerId(taskId, ownerId1);
 
         // Then
         assertTrue(result.isPresent());
@@ -172,7 +172,7 @@ class MemoryTaskRepositoryTest {
         Long nonExistentTaskId = 999L;
 
         // When
-        Optional<TaskEntity> result = repository.findByIdAndNotRemoved(nonExistentTaskId);
+        Optional<TaskEntity> result = repository.findByIdAndOwnerId(nonExistentTaskId, ownerId1);
 
         // Then
         assertFalse(result.isPresent());
@@ -184,7 +184,7 @@ class MemoryTaskRepositoryTest {
         Long removedTaskId = removedTask.getId();
 
         // When
-        Optional<TaskEntity> result = repository.findByIdAndNotRemoved(removedTaskId);
+        Optional<TaskEntity> result = repository.findByIdAndOwnerId(removedTaskId, ownerId1);
 
         // Then
         assertFalse(result.isPresent());
@@ -203,7 +203,7 @@ class MemoryTaskRepositoryTest {
                 .build();
 
         // When
-        TaskEntity result = repository.store(newTask);
+        TaskEntity result = repository.save(newTask);
 
         // Then
         assertNotNull(result.getId());
@@ -211,7 +211,7 @@ class MemoryTaskRepositoryTest {
         assertEquals(ownerId1, result.getOwnerId());
         
         // Verify it can be found
-        Optional<TaskEntity> foundTask = repository.findByIdAndNotRemoved(result.getId());
+        Optional<TaskEntity> foundTask = repository.findByIdAndOwnerId(result.getId(), ownerId1);
         assertTrue(foundTask.isPresent());
         assertEquals(result, foundTask.get());
     }
@@ -219,12 +219,12 @@ class MemoryTaskRepositoryTest {
     @Test
     void testStore_UpdateTask() {
         // Given
-        TaskEntity existingTask = repository.store(task1);
+        TaskEntity existingTask = repository.save(task1);
         existingTask.setName("Updated Task Name");
         existingTask.setFinished(true);
 
         // When
-        TaskEntity result = repository.store(existingTask);
+        TaskEntity result = repository.save(existingTask);
 
         // Then
         assertEquals(existingTask.getId(), result.getId());
@@ -232,7 +232,7 @@ class MemoryTaskRepositoryTest {
         assertTrue(result.getFinished());
         
         // Verify the update
-        Optional<TaskEntity> foundTask = repository.findByIdAndNotRemoved(result.getId());
+        Optional<TaskEntity> foundTask = repository.findByIdAndOwnerId(result.getId(), ownerId1);
         assertTrue(foundTask.isPresent());
         assertEquals("Updated Task Name", foundTask.get().getName());
         assertTrue(foundTask.get().getFinished());
@@ -256,8 +256,8 @@ class MemoryTaskRepositoryTest {
                 .build();
 
         // When
-        TaskEntity resultA = repository.store(taskA);
-        TaskEntity resultB = repository.store(taskB);
+        TaskEntity resultA = repository.save(taskA);
+        TaskEntity resultB = repository.save(taskB);
 
         // Then
         assertNotNull(resultA.getId());
@@ -265,7 +265,7 @@ class MemoryTaskRepositoryTest {
         assertNotEquals(resultA.getId(), resultB.getId());
         
         // Verify both can be found
-        List<TaskEntity> allTasks = repository.findAllByOwnerAndNotRemoved(ownerId1);
+        List<TaskEntity> allTasks = repository.findAllByOwnerId(ownerId1);
         assertTrue(allTasks.size() >= 4); // task1, task2, taskA, taskB
     }
 
@@ -287,8 +287,8 @@ class MemoryTaskRepositoryTest {
                 .build();
 
         // When
-        TaskEntity result1 = repository.store(task1);
-        TaskEntity result2 = repository.store(task2);
+        TaskEntity result1 = repository.save(task1);
+        TaskEntity result2 = repository.save(task2);
 
         // Then
         assertNotNull(result1.getId());

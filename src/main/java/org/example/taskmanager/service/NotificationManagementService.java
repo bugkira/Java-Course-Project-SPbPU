@@ -15,16 +15,11 @@ public class NotificationManagementService {
     private final NotificationDataRepository notificationRepository;
 
     public List<NotificationEntity> getAllUserNotifications(Long recipientId) {
-        return notificationRepository.findAllByRecipientOrderByTimestampDesc(recipientId);
+        return notificationRepository.findAllByRecipientId(recipientId);
     }
 
     public List<NotificationEntity> getUnreadNotifications(Long recipientId) {
-        return notificationRepository.findUnviewedByRecipientOrderByTimestampDesc(recipientId);
-    }
-
-    public NotificationEntity getNotificationDetails(Long notificationId) {
-        return notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new EntityNotFoundException("Notification with id " + notificationId + " not found"));
+        return notificationRepository.findPendingNotificationsByRecipientId(recipientId);
     }
 
     private void performNotificationValidation(NotificationEntity notification) {

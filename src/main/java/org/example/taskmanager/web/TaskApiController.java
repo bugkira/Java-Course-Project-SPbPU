@@ -41,9 +41,9 @@ public class TaskApiController {
         return ResponseEntity.ok(taskService.addNewTask(task));
     }
 
-    @DeleteMapping("/{taskId}")
-    public ResponseEntity<Void> removeTask(@PathVariable Long taskId) {
-        taskService.removeTask(taskId);
+    @DeleteMapping("/{taskId}/user/{ownerId}")
+    public ResponseEntity<Void> removeTask(@PathVariable Long taskId, @PathVariable Long ownerId) {
+        taskService.removeTask(taskId, ownerId);
         return ResponseEntity.noContent().build();
     }
 

@@ -4,14 +4,11 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.example.taskmanager.domain.NotificationEntity;
-import org.example.taskmanager.exception.EntityNotFoundException;
 import org.example.taskmanager.repository.NotificationDataRepository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,7 +71,7 @@ class NotificationManagementServiceTest {
     void testGetAllUserNotifications_Success() {
         // Given
         List<NotificationEntity> expectedNotifications = Arrays.asList(notification1, notification2, unreadNotification);
-        when(notificationRepository.findAllByRecipientOrderByTimestampDesc(testRecipientId))
+        when(notificationRepository.findAllByRecipientId(testRecipientId))
                 .thenReturn(expectedNotifications);
 
         // When
@@ -82,13 +79,13 @@ class NotificationManagementServiceTest {
 
         // Then
         assertEquals(expectedNotifications, actualNotifications);
-        verify(notificationRepository).findAllByRecipientOrderByTimestampDesc(testRecipientId);
+        verify(notificationRepository).findAllByRecipientId(testRecipientId);
     }
 
     @Test
     void testGetAllUserNotifications_EmptyResult() {
         // Given
-        when(notificationRepository.findAllByRecipientOrderByTimestampDesc(testRecipientId))
+        when(notificationRepository.findAllByRecipientId(testRecipientId))
                 .thenReturn(Collections.emptyList());
 
         // When
@@ -96,14 +93,14 @@ class NotificationManagementServiceTest {
 
         // Then
         assertTrue(actualNotifications.isEmpty());
-        verify(notificationRepository).findAllByRecipientOrderByTimestampDesc(testRecipientId);
+        verify(notificationRepository).findAllByRecipientId(testRecipientId);
     }
 
     @Test
     void testGetUnreadNotifications_Success() {
         // Given
         List<NotificationEntity> expectedNotifications = Collections.singletonList(unreadNotification);
-        when(notificationRepository.findUnviewedByRecipientOrderByTimestampDesc(testRecipientId))
+        when(notificationRepository.findPendingNotificationsByRecipientId(testRecipientId))
                 .thenReturn(expectedNotifications);
 
         // When
@@ -111,13 +108,13 @@ class NotificationManagementServiceTest {
 
         // Then
         assertEquals(expectedNotifications, actualNotifications);
-        verify(notificationRepository).findUnviewedByRecipientOrderByTimestampDesc(testRecipientId);
+        verify(notificationRepository).findPendingNotificationsByRecipientId(testRecipientId);
     }
 
     @Test
     void testGetUnreadNotifications_EmptyResult() {
         // Given
-        when(notificationRepository.findUnviewedByRecipientOrderByTimestampDesc(testRecipientId))
+        when(notificationRepository.findPendingNotificationsByRecipientId(testRecipientId))
                 .thenReturn(Collections.emptyList());
 
         // When
@@ -125,34 +122,9 @@ class NotificationManagementServiceTest {
 
         // Then
         assertTrue(actualNotifications.isEmpty());
-        verify(notificationRepository).findUnviewedByRecipientOrderByTimestampDesc(testRecipientId);
+        verify(notificationRepository).findPendingNotificationsByRecipientId(testRecipientId);
     }
 
-    @Test
-    void testGetNotificationDetails_Success() {
-        // Given
-        when(notificationRepository.findById(testNotificationId)).thenReturn(Optional.of(notification1));
-
-        // When
-        NotificationEntity actualNotification = notificationService.getNotificationDetails(testNotificationId);
-
-        // Then
-        assertEquals(notification1, actualNotification);
-        verify(notificationRepository).findById(testNotificationId);
-    }
-
-    @Test
-    void testGetNotificationDetails_NotificationNotFound() {
-        // Given
-        when(notificationRepository.findById(testNotificationId)).thenReturn(Optional.empty());
-
-        // When & Then
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-            () -> notificationService.getNotificationDetails(testNotificationId));
-        
-        assertEquals("Notification with id " + testNotificationId + " not found", exception.getMessage());
-        verify(notificationRepository).findById(testNotificationId);
-    }
 
     @Test
     void testGetAllUserNotifications_DifferentRecipients() {
@@ -167,9 +139,9 @@ class NotificationManagementServiceTest {
                 .viewed(false)
                 .build();
 
-        when(notificationRepository.findAllByRecipientOrderByTimestampDesc(testRecipientId))
+        when(notificationRepository.findAllByRecipientId(testRecipientId))
                 .thenReturn(Arrays.asList(notification1, notification2, unreadNotification));
-        when(notificationRepository.findAllByRecipientOrderByTimestampDesc(recipientId2))
+        when(notificationRepository.findAllByRecipientId(recipientId2))
                 .thenReturn(Collections.singletonList(notificationForUser2));
 
         // When
@@ -191,9 +163,9 @@ class NotificationManagementServiceTest {
         List<NotificationEntity> allNotifications = Arrays.asList(notification1, notification2, unreadNotification);
         List<NotificationEntity> unreadNotifications = Collections.singletonList(unreadNotification);
 
-        when(notificationRepository.findAllByRecipientOrderByTimestampDesc(testRecipientId))
+        when(notificationRepository.findAllByRecipientId(testRecipientId))
                 .thenReturn(allNotifications);
-        when(notificationRepository.findUnviewedByRecipientOrderByTimestampDesc(testRecipientId))
+        when(notificationRepository.findPendingNotificationsByRecipientId(testRecipientId))
                 .thenReturn(unreadNotifications);
 
         // When
@@ -230,7 +202,7 @@ class NotificationManagementServiceTest {
                 .build();
 
         List<NotificationEntity> orderedNotifications = Arrays.asList(newerNotification, unreadNotification, olderNotification);
-        when(notificationRepository.findAllByRecipientOrderByTimestampDesc(testRecipientId))
+        when(notificationRepository.findAllByRecipientId(testRecipientId))
                 .thenReturn(orderedNotifications);
 
         // When
@@ -243,26 +215,4 @@ class NotificationManagementServiceTest {
         assertEquals(olderNotification, result.get(2));
     }
 
-    @Test
-    void testNotificationWithNullValues() {
-        // Given
-        NotificationEntity notificationWithNulls = NotificationEntity.builder()
-                .id(7L)
-                .message("Test notification")
-                .timestamp(LocalDateTime.now())
-                .relatedTaskId(1L) // Use valid ID to avoid NPE
-                .recipientId(1L)   // Use valid ID to avoid NPE
-                .viewed(false)
-                .build();
-
-        when(notificationRepository.findById(7L)).thenReturn(Optional.of(notificationWithNulls));
-
-        // When
-        NotificationEntity result = notificationService.getNotificationDetails(7L);
-
-        // Then
-        assertEquals(notificationWithNulls, result);
-        assertEquals(1L, result.getRelatedTaskId());
-        assertEquals(1L, result.getRecipientId());
-    }
 }
