@@ -236,3 +236,54 @@
 - **Стабильные интеграционные тесты** 
 
 </details>
+
+<details>
+<summary><b>Step 7: Implement Messaging (RabbitMQ)</b></summary>
+
+### Цель
+Реализовать асинхронную обработку сообщений с использованием RabbitMQ для разделения создания задач и уведомлений
+
+### Реализованные функции
+- **RabbitMQ интеграция**: полная настройка RabbitMQ как message broker
+- **Message Publisher**: публикация событий создания/удаления задач
+- **Message Listener**: асинхронная обработка сообщений и создание уведомлений
+- **Topic Exchange**: гибкая маршрутизация сообщений по типам событий
+- **Профиль messaging**: отдельная конфигурация для работы с RabbitMQ
+- **Docker Compose**: обновленная оркестрация с RabbitMQ контейнером
+
+### Архитектура
+- **application-messaging.properties**: конфигурация RabbitMQ подключения и обработки
+- **RabbitMQConfig**: настройка exchanges, queues, bindings и Jackson сериализации
+- **TaskEventPublisher**: публикация событий задач в RabbitMQ
+- **TaskEventListener**: обработка сообщений и создание уведомлений
+- **TaskEventMessage**: DTO для передачи данных о событиях задач
+- **Условная конфигурация**: RabbitMQ компоненты активируются только при наличии настроек
+- **Docker Compose**: PostgreSQL + Redis + RabbitMQ + Spring Boot приложение
+
+### Технологии
+- RabbitMQ 3 Management Alpine
+- Spring AMQP
+- Spring Boot Starter AMQP
+- Jackson2JsonMessageConverter для сериализации
+- Topic Exchange с routing keys
+- Docker Compose с health checks
+- Условные Spring бины (@ConditionalOnProperty)
+
+### Тестирование
+- **TaskEventPublisherTest**: unit тесты публикации сообщений
+- **TaskEventListenerTest**: unit тесты обработки сообщений
+- **MessagingProfileIntegrationTest**: интеграционные тесты с RabbitMQ
+- **Автоматическое управление контейнерами**: Docker Compose плагин для Gradle
+- **Основные тесты проходят** успешно
+
+### Результат
+- **RabbitMQ messaging** 
+- **Асинхронная обработка событий** 
+- **Разделение ответственности** между созданием задач и уведомлений
+- **Topic Exchange с гибкой маршрутизацией** 
+- **Условная активация** RabbitMQ компонентов
+- **Все профили работают** (inmemory, h2, docker, postgresql, cache, messaging) 
+- **Docker Compose с PostgreSQL + Redis + RabbitMQ** 
+- **Стабильная сборка проекта** 
+
+</details>

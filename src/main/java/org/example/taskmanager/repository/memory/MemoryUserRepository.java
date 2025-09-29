@@ -55,4 +55,9 @@ public class MemoryUserRepository implements UserDataRepository {
     public boolean existsById(Long id) {
         return storage.containsKey(id);
     }
+
+    @Override
+    public Optional<UserEntity> findById(Long id) {
+        return Optional.ofNullable(storage.get(id));
+    }
 }

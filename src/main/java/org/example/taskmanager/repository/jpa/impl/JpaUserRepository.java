@@ -47,4 +47,9 @@ public class JpaUserRepository implements UserDataRepository {
     public boolean existsById(Long id) {
         return jpaRepository.existsById(id);
     }
+
+    @Override
+    public Optional<UserEntity> findById(Long id) {
+        return jpaRepository.findById(id);
+    }
 }

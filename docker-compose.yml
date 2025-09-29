@@ -34,17 +34,41 @@ services:
       retries: 5
     command: redis-server --appendonly yes
 
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: taskmanager-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: taskmanager
+      RABBITMQ_DEFAULT_PASS: taskmanager123
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI port
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Spring Boot Application
   app:
     build: .
     container_name: taskmanager-app
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: messaging
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/taskmanager
       SPRING_DATASOURCE_USERNAME: taskmanager
       SPRING_DATASOURCE_PASSWORD: taskmanager123
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: taskmanager
+      SPRING_RABBITMQ_PASSWORD: taskmanager123
     ports:
       - "8080:8080"
     depends_on:
@@ -52,8 +76,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:
   postgres_data:
   redis_data:
+  rabbitmq_data:
