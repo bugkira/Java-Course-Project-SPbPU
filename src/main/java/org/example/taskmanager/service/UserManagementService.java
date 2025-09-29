@@ -6,6 +6,8 @@ import org.example.taskmanager.domain.UserEntity;
 import org.example.taskmanager.exception.DuplicateEntityException;
 import org.example.taskmanager.exception.EntityNotFoundException;
 import org.example.taskmanager.repository.UserDataRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ public class UserManagementService {
 
     private final UserDataRepository userRepository;
 
+    @CacheEvict(value = "users", allEntries = true)
     public UserEntity createUserAccount(UserEntity user) {
         performUserValidation(user);
         verifyLoginUniqueness(user.getLogin());
@@ -25,6 +28,7 @@ public class UserManagementService {
         return userRepository.save(user);
     }
 
+    @Cacheable(value = "users", key = "'user-' + #login")
     public UserEntity authenticateUser(String login, String password) {
         UserEntity user = userRepository.findByLogin(login)
                 .orElseThrow(() -> new EntityNotFoundException("Invalid login or password"));
