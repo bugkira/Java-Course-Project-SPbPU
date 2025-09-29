@@ -1,6 +1,7 @@
 package org.example.taskmanager.service;
 
 import org.example.taskmanager.domain.UserEntity;
+import org.example.taskmanager.exception.DuplicateEntityException;
 import org.example.taskmanager.exception.EntityNotFoundException;
 import org.example.taskmanager.repository.UserDataRepository;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -174,7 +175,7 @@ class UserManagementServiceTest {
         when(userRepository.existsByLogin("testuser")).thenReturn(true);
 
         // When & Then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        DuplicateEntityException exception = assertThrows(DuplicateEntityException.class,
             () -> userService.createUserAccount(validUser));
         
         assertEquals("Login already exists", exception.getMessage());
@@ -190,7 +191,7 @@ class UserManagementServiceTest {
         when(userRepository.existsByEmailAddress("test@example.com")).thenReturn(true);
 
         // When & Then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        DuplicateEntityException exception = assertThrows(DuplicateEntityException.class,
             () -> userService.createUserAccount(validUser));
         
         assertEquals("Email already exists", exception.getMessage());

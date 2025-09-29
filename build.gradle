@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.5'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'com.avast.gradle.docker-compose' version '0.17.7'
 }
 
 group = 'org.example'
@@ -19,6 +20,8 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-database-postgresql'
 	implementation 'com.h2database:h2'
 	implementation 'org.postgresql:postgresql'
 	implementation 'org.projectlombok:lombok'
@@ -31,3 +34,31 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// Docker Compose configuration for integration tests
+dockerCompose {
+	useComposeFiles = ['docker-compose.yml']
+	
+	// Only start PostgreSQL service for tests
+	startedServices = ['postgres']
+	
+	// Wait for PostgreSQL to be ready
+	waitForTcpPorts = true
+	tcpPortsToIgnoreWhenWaiting = []
+	
+	// Stop containers after tests
+	stopContainers = true
+	removeContainers = true
+	removeVolumes = true
+	removeOrphans = true
+	
+	// Environment variables for tests
+	environment.put 'SPRING_PROFILES_ACTIVE', 'docker'
+	environment.put 'SPRING_DATASOURCE_URL', 'jdbc:postgresql://localhost:5433/taskmanager'
+	environment.put 'SPRING_DATASOURCE_USERNAME', 'taskmanager'
+	environment.put 'SPRING_DATASOURCE_PASSWORD', 'taskmanager123'
+}
+
+// Make test task depend on composeUp
+test.dependsOn 'composeUp'
+test.finalizedBy 'composeDown'

@@ -3,6 +3,7 @@ package org.example.taskmanager.service;
 import java.util.regex.Pattern;
 
 import org.example.taskmanager.domain.UserEntity;
+import org.example.taskmanager.exception.DuplicateEntityException;
 import org.example.taskmanager.exception.EntityNotFoundException;
 import org.example.taskmanager.repository.UserDataRepository;
 import org.springframework.stereotype.Service;
@@ -57,13 +58,13 @@ public class UserManagementService {
 
     private void verifyLoginUniqueness(String login) {
         if (userRepository.existsByLogin(login)) {
-            throw new IllegalArgumentException("Login already exists");
+            throw new DuplicateEntityException("Login already exists");
         }
     }
 
     private void verifyEmailUniqueness(String email) {
         if (userRepository.existsByEmailAddress(email)) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new DuplicateEntityException("Email already exists");
         }
     }
 }

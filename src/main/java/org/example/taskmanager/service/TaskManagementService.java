@@ -6,6 +6,7 @@ import java.util.List;
 import org.example.taskmanager.domain.TaskEntity;
 import org.example.taskmanager.exception.EntityNotFoundException;
 import org.example.taskmanager.repository.TaskDataRepository;
+import org.example.taskmanager.repository.UserDataRepository;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class TaskManagementService {
 
     private final TaskDataRepository taskRepository;
+    private final UserDataRepository userRepository;
 
     public List<TaskEntity> getAllUserTasks(Long ownerId) {
         return taskRepository.findAllByOwnerId(ownerId);
@@ -45,6 +47,9 @@ public class TaskManagementService {
     private void performTaskValidation(TaskEntity task) {
         if (task.getOwnerId() == null) {
             throw new IllegalArgumentException("Task owner ID must not be null");
+        }
+        if (!userRepository.existsById(task.getOwnerId())) {
+            throw new IllegalArgumentException("User with id " + task.getOwnerId() + " does not exist");
         }
         if (task.getName() == null || task.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Task name must not be empty");

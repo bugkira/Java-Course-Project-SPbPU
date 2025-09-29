@@ -50,4 +50,9 @@ public class MemoryUserRepository implements UserDataRepository {
         return storage.values().stream()
                 .anyMatch(user -> user.getEmailAddress().equals(emailAddress));
     }
+
+    @Override
+    public boolean existsById(Long id) {
+        return storage.containsKey(id);
+    }
 }

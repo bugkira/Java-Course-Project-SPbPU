@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.example.taskmanager.domain.TaskEntity;
 import org.example.taskmanager.exception.EntityNotFoundException;
 import org.example.taskmanager.repository.TaskDataRepository;
+import org.example.taskmanager.repository.UserDataRepository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,6 +30,9 @@ class TaskManagementServiceTest {
 
     @Mock
     private TaskDataRepository taskRepository;
+
+    @Mock
+    private UserDataRepository userRepository;
 
     @InjectMocks
     private TaskManagementService taskService;
@@ -175,6 +179,7 @@ class TaskManagementServiceTest {
                 .removed(false)
                 .build();
 
+        when(userRepository.existsById(testOwnerId)).thenReturn(true);
         when(taskRepository.save(any(TaskEntity.class))).thenReturn(savedTask);
 
         // When
@@ -198,6 +203,8 @@ class TaskManagementServiceTest {
                 .dueDate(LocalDateTime.now().plusDays(1))
                 .build();
 
+        when(userRepository.existsById(testOwnerId)).thenReturn(true);
+
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> taskService.addNewTask(invalidTask));
@@ -216,6 +223,8 @@ class TaskManagementServiceTest {
                 .dueDate(LocalDateTime.now().plusDays(1))
                 .build();
 
+        when(userRepository.existsById(testOwnerId)).thenReturn(true);
+
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> taskService.addNewTask(invalidTask));
@@ -233,6 +242,8 @@ class TaskManagementServiceTest {
                 .ownerId(testOwnerId)
                 .dueDate(LocalDateTime.now().minusDays(1))
                 .build();
+
+        when(userRepository.existsById(testOwnerId)).thenReturn(true);
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
