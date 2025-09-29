@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@Profile({"docker", "postgresql"})
+@Profile({"docker", "postgresql", "messaging"})
 public class JpaUserRepositoryImpl implements UserDataRepository {
 
     private final UserJpaRepository jpaRepository;
@@ -46,5 +46,10 @@ public class JpaUserRepositoryImpl implements UserDataRepository {
     @Override
     public boolean existsById(Long id) {
         return jpaRepository.existsById(id);
+    }
+
+    @Override
+    public Optional<UserEntity> findById(Long id) {
+        return jpaRepository.findById(id);
     }
 }

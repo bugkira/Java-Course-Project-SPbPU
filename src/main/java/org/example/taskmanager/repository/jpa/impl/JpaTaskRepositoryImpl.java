@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@Profile({"docker", "postgresql"})
+@Profile({"docker", "postgresql", "messaging"})
 public class JpaTaskRepositoryImpl implements TaskDataRepository {
 
     private final TaskJpaRepository jpaRepository;

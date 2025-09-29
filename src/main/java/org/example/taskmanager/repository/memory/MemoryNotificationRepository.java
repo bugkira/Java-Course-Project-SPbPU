@@ -41,4 +41,13 @@ public class MemoryNotificationRepository implements NotificationDataRepository 
                 .filter(notification -> notification.getRelatedTaskId().equals(relatedTaskId))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public NotificationEntity save(NotificationEntity notification) {
+        if (notification.getId() == null) {
+            notification.setId(idGenerator.getAndIncrement());
+        }
+        storage.put(notification.getId(), notification);
+        return notification;
+    }
 }

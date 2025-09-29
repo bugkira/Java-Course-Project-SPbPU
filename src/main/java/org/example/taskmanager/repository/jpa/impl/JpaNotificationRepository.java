@@ -32,4 +32,9 @@ public class JpaNotificationRepository implements NotificationDataRepository {
     public List<NotificationEntity> findByRelatedTaskId(Long relatedTaskId) {
         return jpaRepository.findByRelatedTaskId(relatedTaskId);
     }
+
+    @Override
+    public NotificationEntity save(NotificationEntity notification) {
+        return jpaRepository.save(notification);
+    }
 }

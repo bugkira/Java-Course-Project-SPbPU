@@ -22,6 +22,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-amqp' // Added for RabbitMQ messaging
 	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.flywaydb:flyway-database-postgresql'
 	implementation 'com.h2database:h2'
@@ -30,6 +31,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.amqp:spring-rabbit-test' // Added for RabbitMQ testing
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
@@ -41,8 +43,8 @@ tasks.named('test') {
 dockerCompose {
 	useComposeFiles = ['docker-compose.yml']
 	
-	// Start PostgreSQL and Redis services for tests
-	startedServices = ['postgres', 'redis']
+	// Start PostgreSQL, Redis and RabbitMQ services for tests
+	startedServices = ['postgres', 'redis', 'rabbitmq']
 	
 	// Wait for services to be ready
 	waitForTcpPorts = true
@@ -55,12 +57,16 @@ dockerCompose {
 	removeOrphans = true
 	
 	// Environment variables for tests
-	environment.put 'SPRING_PROFILES_ACTIVE', 'docker'
+	environment.put 'SPRING_PROFILES_ACTIVE', 'messaging'
 	environment.put 'SPRING_DATASOURCE_URL', 'jdbc:postgresql://localhost:5433/taskmanager'
 	environment.put 'SPRING_DATASOURCE_USERNAME', 'taskmanager'
 	environment.put 'SPRING_DATASOURCE_PASSWORD', 'taskmanager123'
 	environment.put 'SPRING_REDIS_HOST', 'localhost'
 	environment.put 'SPRING_REDIS_PORT', '6379'
+	environment.put 'SPRING_RABBITMQ_HOST', 'localhost'
+	environment.put 'SPRING_RABBITMQ_PORT', '5672'
+	environment.put 'SPRING_RABBITMQ_USERNAME', 'taskmanager'
+	environment.put 'SPRING_RABBITMQ_PASSWORD', 'taskmanager123'
 }
 
 // Make test task depend on composeUp

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@Profile({"docker", "postgresql"})
+@Profile({"docker", "postgresql", "messaging"})
 public class JpaNotificationRepositoryImpl implements NotificationDataRepository {
 
     private final NotificationJpaRepository jpaRepository;
@@ -31,5 +31,10 @@ public class JpaNotificationRepositoryImpl implements NotificationDataRepository
     @Override
     public List<NotificationEntity> findByRelatedTaskId(Long relatedTaskId) {
         return jpaRepository.findByRelatedTaskId(relatedTaskId);
+    }
+
+    @Override
+    public NotificationEntity save(NotificationEntity notification) {
+        return jpaRepository.save(notification);
     }
 }

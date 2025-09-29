@@ -6,6 +6,7 @@ import org.example.taskmanager.domain.UserEntity;
 
 public interface UserDataRepository {
     UserEntity save(UserEntity user);
+    Optional<UserEntity> findById(Long id);
     Optional<UserEntity> findByLogin(String login);
     Optional<UserEntity> findByEmailAddress(String emailAddress);
     boolean existsByLogin(String login);
