@@ -1,11 +1,11 @@
 package org.example.taskmanager.integration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import org.example.taskmanager.domain.TaskEntity;
 import org.example.taskmanager.domain.UserEntity;
 import org.junit.jupiter.api.Test;
-
-import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,7 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("docker")
@@ -41,10 +41,11 @@ class DockerIntegrationTest {
 
     @Test
     void shouldCreateUserSuccessfully() throws Exception {
-        // Given
+        // Given - create unique user for this test
+        String uniqueId = String.valueOf(System.currentTimeMillis());
         UserEntity user = UserEntity.builder()
-                .login("testuser")
-                .emailAddress("test@example.com")
+                .login("testuser" + uniqueId)
+                .emailAddress("test" + uniqueId + "@example.com")
                 .passwordHash("password123")
                 .build();
 
@@ -62,8 +63,8 @@ class DockerIntegrationTest {
 
         // Then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).contains("testuser");
-        assertThat(response.getBody()).contains("test@example.com");
+        assertThat(response.getBody()).contains("testuser" + uniqueId);
+        assertThat(response.getBody()).contains("test" + uniqueId + "@example.com");
         assertThat(response.getBody()).contains("password123");
     }
 
@@ -118,7 +119,7 @@ class DockerIntegrationTest {
     void shouldGetPendingUserTasksSuccessfully() throws Exception {
         // When
         ResponseEntity<String> response = restTemplate.exchange(
-                getBaseUrl() + "/api/tasks/user/1/pending",
+                getBaseUrl() + "/api/tasks/user/1/active",
                 HttpMethod.GET,
                 null,
                 String.class
@@ -134,7 +135,7 @@ class DockerIntegrationTest {
     void shouldGetUserNotificationsSuccessfully() throws Exception {
         // When
         ResponseEntity<String> response = restTemplate.exchange(
-                getBaseUrl() + "/api/notifications/user/1",
+                getBaseUrl() + "/api/notifications/1",
                 HttpMethod.GET,
                 null,
                 String.class
@@ -150,7 +151,7 @@ class DockerIntegrationTest {
     void shouldGetPendingUserNotificationsSuccessfully() throws Exception {
         // When
         ResponseEntity<String> response = restTemplate.exchange(
-                getBaseUrl() + "/api/notifications/user/1/pending",
+                getBaseUrl() + "/api/notifications/1/unread",
                 HttpMethod.GET,
                 null,
                 String.class
@@ -187,7 +188,7 @@ class DockerIntegrationTest {
         );
 
         // Then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -195,7 +196,9 @@ class DockerIntegrationTest {
         // Given
         TaskEntity invalidTask = TaskEntity.builder()
                 .name("") // Empty name should be invalid
+                .details("Valid details")
                 .ownerId(1L)
+                .dueDate(LocalDateTime.of(2025, 12, 31, 23, 59, 59))
                 .build();
 
         HttpHeaders headers = new HttpHeaders();

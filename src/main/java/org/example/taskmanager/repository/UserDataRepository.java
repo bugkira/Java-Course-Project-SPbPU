@@ -10,4 +10,5 @@ public interface UserDataRepository {
     Optional<UserEntity> findByEmailAddress(String emailAddress);
     boolean existsByLogin(String login);
     boolean existsByEmailAddress(String emailAddress);
+    boolean existsById(Long id);
 }

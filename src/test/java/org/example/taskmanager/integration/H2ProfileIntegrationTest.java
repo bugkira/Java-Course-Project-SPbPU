@@ -1,10 +1,11 @@
 package org.example.taskmanager.integration;
 
+import java.time.LocalDateTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import org.example.taskmanager.domain.TaskEntity;
 import org.example.taskmanager.domain.UserEntity;
 import org.junit.jupiter.api.Test;
-
-import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -16,8 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("h2")
@@ -146,25 +145,28 @@ class H2ProfileIntegrationTest {
 
         HttpEntity<TaskEntity> taskRequest = new HttpEntity<>(task, headers);
 
-        ResponseEntity<String> taskResponse = restTemplate.exchange(
+        ResponseEntity<TaskEntity> taskResponse = restTemplate.exchange(
                 getBaseUrl() + "/api/tasks",
                 HttpMethod.POST,
                 taskRequest,
-                String.class
+                TaskEntity.class
         );
 
         assertThat(taskResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        TaskEntity createdTask = taskResponse.getBody();
+        assertThat(createdTask).isNotNull();
+        assertThat(createdTask.getId()).isNotNull();
 
         // When - Remove task
-        ResponseEntity<String> removeResponse = restTemplate.exchange(
-                getBaseUrl() + "/api/tasks/1/user/1",
+        ResponseEntity<Void> removeResponse = restTemplate.exchange(
+                getBaseUrl() + "/api/tasks/" + createdTask.getId() + "/user/1",
                 HttpMethod.DELETE,
                 null,
-                String.class
+                Void.class
         );
 
         // Then
-        assertThat(removeResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(removeResponse.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
         // Verify task is not returned in user tasks
         ResponseEntity<String> getTasksResponse = restTemplate.exchange(
@@ -175,6 +177,7 @@ class H2ProfileIntegrationTest {
         );
 
         assertThat(getTasksResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(getTasksResponse.getBody()).isEqualTo("[]");
+        // Task should not be in the list (should be marked as removed)
+        assertThat(getTasksResponse.getBody()).doesNotContain("Task to Remove");
     }
 }

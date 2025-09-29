@@ -1,5 +1,8 @@
 package org.example.taskmanager.integration;
 
+import java.time.LocalDateTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import org.example.taskmanager.domain.TaskEntity;
 import org.example.taskmanager.domain.UserEntity;
 import org.junit.jupiter.api.Test;
@@ -14,10 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.time.LocalDateTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("docker")
@@ -35,10 +34,11 @@ class BasicIntegrationTest {
 
     @Test
     void shouldCreateUserSuccessfully() throws Exception {
-        // Given
+        // Given - create unique user for this test
+        String uniqueId = String.valueOf(System.currentTimeMillis());
         UserEntity user = UserEntity.builder()
-                .login("testuser")
-                .emailAddress("test@example.com")
+                .login("testuser" + uniqueId)
+                .emailAddress("test" + uniqueId + "@example.com")
                 .passwordHash("password123")
                 .build();
 
@@ -56,8 +56,8 @@ class BasicIntegrationTest {
 
         // Then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).contains("testuser");
-        assertThat(response.getBody()).contains("test@example.com");
+        assertThat(response.getBody()).contains("testuser" + uniqueId);
+        assertThat(response.getBody()).contains("test" + uniqueId + "@example.com");
     }
 
     @Test
@@ -108,7 +108,7 @@ class BasicIntegrationTest {
     void shouldGetPendingUserTasksSuccessfully() throws Exception {
         // When
         ResponseEntity<String> response = restTemplate.exchange(
-                getBaseUrl() + "/api/tasks/user/1/pending",
+                getBaseUrl() + "/api/tasks/user/1/active",
                 HttpMethod.GET,
                 null,
                 String.class
@@ -124,7 +124,7 @@ class BasicIntegrationTest {
     void shouldGetUserNotificationsSuccessfully() throws Exception {
         // When
         ResponseEntity<String> response = restTemplate.exchange(
-                getBaseUrl() + "/api/notifications/user/1",
+                getBaseUrl() + "/api/notifications/1",
                 HttpMethod.GET,
                 null,
                 String.class
@@ -140,7 +140,7 @@ class BasicIntegrationTest {
     void shouldGetPendingUserNotificationsSuccessfully() throws Exception {
         // When
         ResponseEntity<String> response = restTemplate.exchange(
-                getBaseUrl() + "/api/notifications/user/1/pending",
+                getBaseUrl() + "/api/notifications/1/unread",
                 HttpMethod.GET,
                 null,
                 String.class
@@ -177,6 +177,6 @@ class BasicIntegrationTest {
         );
 
         // Then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 }

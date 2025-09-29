@@ -42,4 +42,9 @@ public class JpaUserRepositoryImpl implements UserDataRepository {
     public UserEntity save(UserEntity user) {
         return jpaRepository.save(user);
     }
+
+    @Override
+    public boolean existsById(Long id) {
+        return jpaRepository.existsById(id);
+    }
 }

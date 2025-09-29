@@ -1,6 +1,7 @@
 package org.example.taskmanager.web;
 
 import org.example.taskmanager.domain.UserEntity;
+import org.example.taskmanager.exception.DuplicateEntityException;
 import org.example.taskmanager.exception.EntityAlreadyExistsException;
 import org.example.taskmanager.exception.EntityNotFoundException;
 import org.example.taskmanager.service.UserManagementService;
@@ -30,16 +31,22 @@ public class UserApiController {
 
     @GetMapping("/login")
     public ResponseEntity<UserEntity> authenticateUser(@RequestParam String login, @RequestParam String password) {
-        UserEntity user = userService.authenticateUser(login, password);
-        if (user != null) {
+        try {
+            UserEntity user = userService.authenticateUser(login, password);
             return ResponseEntity.ok(user);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleValidationError(IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(DuplicateEntityException.class)
+    public ResponseEntity<String> handleDuplicateEntity(DuplicateEntityException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
     @ExceptionHandler(EntityAlreadyExistsException.class)

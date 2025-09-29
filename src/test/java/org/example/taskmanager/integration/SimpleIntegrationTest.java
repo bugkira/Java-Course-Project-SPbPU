@@ -1,5 +1,8 @@
 package org.example.taskmanager.integration;
 
+import java.time.LocalDateTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import org.example.taskmanager.domain.TaskEntity;
 import org.example.taskmanager.domain.UserEntity;
 import org.junit.jupiter.api.Test;
@@ -14,10 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.time.LocalDateTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("docker")
@@ -36,9 +35,10 @@ class SimpleIntegrationTest {
     @Test
     void shouldCreateUserAndTaskSuccessfully() throws Exception {
         // Step 1: Create a user
+        String uniqueId = String.valueOf(System.currentTimeMillis());
         UserEntity user = UserEntity.builder()
-                .login("testuser")
-                .emailAddress("test@example.com")
+                .login("testuser" + uniqueId)
+                .emailAddress("test" + uniqueId + "@example.com")
                 .passwordHash("password123")
                 .build();
 
@@ -54,8 +54,8 @@ class SimpleIntegrationTest {
         );
 
         assertThat(userResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(userResponse.getBody()).contains("testuser");
-        assertThat(userResponse.getBody()).contains("test@example.com");
+        assertThat(userResponse.getBody()).contains("testuser" + uniqueId);
+        assertThat(userResponse.getBody()).contains("test" + uniqueId + "@example.com");
 
         // Step 2: Create a task
         TaskEntity task = TaskEntity.builder()
@@ -91,7 +91,7 @@ class SimpleIntegrationTest {
 
         // Step 4: Get pending tasks
         ResponseEntity<String> getPendingTasksResponse = restTemplate.exchange(
-                getBaseUrl() + "/api/tasks/user/1/pending",
+                getBaseUrl() + "/api/tasks/user/1/active",
                 HttpMethod.GET,
                 null,
                 String.class
@@ -102,18 +102,18 @@ class SimpleIntegrationTest {
 
         // Step 5: Test user login
         ResponseEntity<String> loginResponse = restTemplate.exchange(
-                getBaseUrl() + "/api/users/login?login=testuser&password=password123",
+                getBaseUrl() + "/api/users/login?login=testuser" + uniqueId + "&password=password123",
                 HttpMethod.GET,
                 null,
                 String.class
         );
 
         assertThat(loginResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(loginResponse.getBody()).contains("testuser");
+        assertThat(loginResponse.getBody()).contains("testuser" + uniqueId);
 
         // Step 6: Get notifications (should be empty)
         ResponseEntity<String> notificationsResponse = restTemplate.exchange(
-                getBaseUrl() + "/api/notifications/user/1",
+                getBaseUrl() + "/api/notifications/1",
                 HttpMethod.GET,
                 null,
                 String.class
@@ -124,7 +124,7 @@ class SimpleIntegrationTest {
 
         // Step 7: Get pending notifications (should be empty)
         ResponseEntity<String> pendingNotificationsResponse = restTemplate.exchange(
-                getBaseUrl() + "/api/notifications/user/1/pending",
+                getBaseUrl() + "/api/notifications/1/unread",
                 HttpMethod.GET,
                 null,
                 String.class

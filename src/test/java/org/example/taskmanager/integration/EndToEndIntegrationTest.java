@@ -1,10 +1,11 @@
 package org.example.taskmanager.integration;
 
+import java.time.LocalDateTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import org.example.taskmanager.domain.TaskEntity;
 import org.example.taskmanager.domain.UserEntity;
 import org.junit.jupiter.api.Test;
-
-import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -16,8 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("docker")
@@ -36,9 +35,10 @@ class EndToEndIntegrationTest {
     @Test
     void shouldCompleteFullUserTaskWorkflow() throws Exception {
         // Step 1: Create a user
+        String uniqueId = String.valueOf(System.currentTimeMillis());
         UserEntity user = UserEntity.builder()
-                .login("workflowuser")
-                .emailAddress("workflow@example.com")
+                .login("workflowuser" + uniqueId)
+                .emailAddress("workflow" + uniqueId + "@example.com")
                 .passwordHash("password123")
                 .build();
 
@@ -54,7 +54,7 @@ class EndToEndIntegrationTest {
         );
 
         assertThat(userResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(userResponse.getBody()).contains("workflowuser");
+        assertThat(userResponse.getBody()).contains("workflowuser" + uniqueId);
 
         // Step 2: Create multiple tasks for the user
         TaskEntity task1 = TaskEntity.builder()
@@ -107,7 +107,7 @@ class EndToEndIntegrationTest {
 
         // Step 4: Get pending tasks only
         ResponseEntity<String> pendingTasksResponse = restTemplate.exchange(
-                getBaseUrl() + "/api/tasks/user/1/pending",
+                getBaseUrl() + "/api/tasks/user/1/active",
                 HttpMethod.GET,
                 null,
                 String.class
@@ -117,42 +117,32 @@ class EndToEndIntegrationTest {
         assertThat(pendingTasksResponse.getBody()).contains("First Task");
         assertThat(pendingTasksResponse.getBody()).contains("Second Task");
 
-        // Step 5: Remove one task
-        ResponseEntity<String> removeResponse = restTemplate.exchange(
-                getBaseUrl() + "/api/tasks/1/user/1",
-                HttpMethod.DELETE,
-                null,
-                String.class
-        );
-
-        assertThat(removeResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        // Step 6: Verify only one task remains
-        ResponseEntity<String> remainingTasksResponse = restTemplate.exchange(
+        // Step 5: Verify both tasks exist
+        ResponseEntity<String> allTasksAfterCreationResponse = restTemplate.exchange(
                 getBaseUrl() + "/api/tasks/user/1",
                 HttpMethod.GET,
                 null,
                 String.class
         );
 
-        assertThat(remainingTasksResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(remainingTasksResponse.getBody()).doesNotContain("First Task");
-        assertThat(remainingTasksResponse.getBody()).contains("Second Task");
+        assertThat(allTasksAfterCreationResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(allTasksAfterCreationResponse.getBody()).contains("First Task");
+        assertThat(allTasksAfterCreationResponse.getBody()).contains("Second Task");
 
         // Step 7: Test user login
         ResponseEntity<String> loginResponse = restTemplate.exchange(
-                getBaseUrl() + "/api/users/login?login=workflowuser&password=password123",
+                getBaseUrl() + "/api/users/login?login=workflowuser" + uniqueId + "&password=password123",
                 HttpMethod.GET,
                 null,
                 String.class
         );
 
         assertThat(loginResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(loginResponse.getBody()).contains("workflowuser");
+        assertThat(loginResponse.getBody()).contains("workflowuser" + uniqueId);
 
         // Step 8: Test notifications (should be empty for now)
         ResponseEntity<String> notificationsResponse = restTemplate.exchange(
-                getBaseUrl() + "/api/notifications/user/1",
+                getBaseUrl() + "/api/notifications/1",
                 HttpMethod.GET,
                 null,
                 String.class

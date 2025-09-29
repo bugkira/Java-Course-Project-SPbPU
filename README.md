@@ -140,3 +140,46 @@
 
 </details>
 
+
+
+<details>
+<summary><b>Step 5: Switch to PostgreSQL Database</b></summary>
+
+### Цель
+Заменить H2 на PostgreSQL с использованием Flyway для миграций и Mockito для тестирования
+
+### Реализованные функции
+- **PostgreSQL интеграция**: полная замена H2 на PostgreSQL
+- **Flyway миграции**: автоматическое управление схемой базы данных
+- **Mockito тестирование**: мокирование репозиториев для unit-тестов
+- **Профиль postgresql**: отдельная конфигурация для PostgreSQL
+- **Docker Compose**: обновленная оркестрация с PostgreSQL контейнером
+
+### Архитектура
+- **application-postgresql.properties**: конфигурация PostgreSQL подключения
+- **Flyway миграции**: 
+  - V1__Create_users_table.sql
+  - V2__Create_tasks_table.sql  
+  - V3__Create_notifications_table.sql
+- **Mockito тесты**:
+  - `PostgreSQLServiceTest` - тестирование сервисов с мокированием
+  - `PostgreSQLRepositoryTest` - тестирование репозиториев
+  - `PostgreSQLIntegrationTest` - интеграционные тесты для PostgreSQL профиля
+- **Docker Compose**: PostgreSQL + Spring Boot приложение с health checks
+
+### Технологии
+- PostgreSQL 15 Alpine
+- Flyway для миграций базы данных
+- Mockito для unit-тестирования
+- Spring Data JPA с PostgreSQL
+- Docker Compose с health checks
+
+### Результат
+- **PostgreSQL база данных** ✅
+- **Flyway миграции** ✅
+- **Mockito тестирование** ✅
+- **Все профили работают** (inmemory, h2, docker, postgresql) ✅
+- **Docker Compose с PostgreSQL** ✅
+- **Автоматическое управление схемой** ✅
+
+</details>
