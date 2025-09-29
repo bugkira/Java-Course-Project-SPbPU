@@ -20,6 +20,8 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.flywaydb:flyway-database-postgresql'
 	implementation 'com.h2database:h2'
@@ -39,10 +41,10 @@ tasks.named('test') {
 dockerCompose {
 	useComposeFiles = ['docker-compose.yml']
 	
-	// Only start PostgreSQL service for tests
-	startedServices = ['postgres']
+	// Start PostgreSQL and Redis services for tests
+	startedServices = ['postgres', 'redis']
 	
-	// Wait for PostgreSQL to be ready
+	// Wait for services to be ready
 	waitForTcpPorts = true
 	tcpPortsToIgnoreWhenWaiting = []
 	
@@ -57,6 +59,8 @@ dockerCompose {
 	environment.put 'SPRING_DATASOURCE_URL', 'jdbc:postgresql://localhost:5433/taskmanager'
 	environment.put 'SPRING_DATASOURCE_USERNAME', 'taskmanager'
 	environment.put 'SPRING_DATASOURCE_PASSWORD', 'taskmanager123'
+	environment.put 'SPRING_REDIS_HOST', 'localhost'
+	environment.put 'SPRING_REDIS_PORT', '6379'
 }
 
 // Make test task depend on composeUp

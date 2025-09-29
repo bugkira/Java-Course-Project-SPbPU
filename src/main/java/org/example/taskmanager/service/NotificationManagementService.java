@@ -1,12 +1,13 @@
 package org.example.taskmanager.service;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.example.taskmanager.exception.EntityNotFoundException;
+import java.util.List;
+
 import org.example.taskmanager.domain.NotificationEntity;
 import org.example.taskmanager.repository.NotificationDataRepository;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -14,10 +15,12 @@ public class NotificationManagementService {
 
     private final NotificationDataRepository notificationRepository;
 
+    @Cacheable(value = "notifications", key = "'all-notifications-' + #recipientId")
     public List<NotificationEntity> getAllUserNotifications(Long recipientId) {
         return notificationRepository.findAllByRecipientId(recipientId);
     }
 
+    @Cacheable(value = "notifications", key = "'unread-notifications-' + #recipientId")
     public List<NotificationEntity> getUnreadNotifications(Long recipientId) {
         return notificationRepository.findPendingNotificationsByRecipientId(recipientId);
     }

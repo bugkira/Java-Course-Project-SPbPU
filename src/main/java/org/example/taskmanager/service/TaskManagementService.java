@@ -7,6 +7,8 @@ import org.example.taskmanager.domain.TaskEntity;
 import org.example.taskmanager.exception.EntityNotFoundException;
 import org.example.taskmanager.repository.TaskDataRepository;
 import org.example.taskmanager.repository.UserDataRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -18,25 +20,30 @@ public class TaskManagementService {
     private final TaskDataRepository taskRepository;
     private final UserDataRepository userRepository;
 
+    @Cacheable(value = "tasks", key = "'all-tasks-' + #ownerId")
     public List<TaskEntity> getAllUserTasks(Long ownerId) {
         return taskRepository.findAllByOwnerId(ownerId);
     }
 
+    @Cacheable(value = "tasks", key = "'active-tasks-' + #ownerId")
     public List<TaskEntity> getActiveTasks(Long ownerId) {
         return taskRepository.findPendingTasksByOwnerId(ownerId);
     }
 
+    @Cacheable(value = "tasks", key = "'task-' + #taskId + '-' + #ownerId")
     public TaskEntity getTaskDetails(Long taskId, Long ownerId) {
         return taskRepository.findByIdAndOwnerId(taskId, ownerId)
                 .orElseThrow(() -> new EntityNotFoundException("Task with id " + taskId + " not found"));
     }
 
+    @CacheEvict(value = "tasks", allEntries = true)
     public TaskEntity addNewTask(TaskEntity task) {
         performTaskValidation(task);
         task.setCreateTime(LocalDateTime.now());
         return taskRepository.save(task);
     }
 
+    @CacheEvict(value = "tasks", allEntries = true)
     public void removeTask(Long taskId, Long ownerId) {
         TaskEntity task = taskRepository.findByIdAndOwnerId(taskId, ownerId)
                 .orElseThrow(() -> new EntityNotFoundException("Task with id " + taskId + " not found"));
