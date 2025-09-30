@@ -1,10 +1,7 @@
 package org.example.taskmanager.integration;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.example.taskmanager.domain.NotificationEntity;
 import org.example.taskmanager.domain.TaskEntity;
@@ -13,6 +10,10 @@ import org.example.taskmanager.repository.NotificationDataRepository;
 import org.example.taskmanager.repository.TaskDataRepository;
 import org.example.taskmanager.repository.UserDataRepository;
 import org.example.taskmanager.service.TaskSchedulerService;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,11 +46,13 @@ class TaskSchedulerIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // Create test user
+        // Create test user with unique login
+        String uniqueLogin = "schedulertest_" + System.currentTimeMillis();
+        String uniqueEmail = "scheduler_" + System.currentTimeMillis() + "@test.com";
         testUser = UserEntity.builder()
-                .login("schedulertest")
+                .login(uniqueLogin)
                 .passwordHash("hashedpassword")
-                .emailAddress("scheduler@test.com")
+                .emailAddress(uniqueEmail)
                 .build();
         testUser = userRepository.save(testUser);
         
