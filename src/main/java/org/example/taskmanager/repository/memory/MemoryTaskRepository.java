@@ -1,5 +1,6 @@
 package org.example.taskmanager.repository.memory;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,15 @@ public class MemoryTaskRepository implements TaskDataRepository {
     public List<TaskEntity> findPendingTasksByOwnerId(Long ownerId) {
         return storage.values().stream()
                 .filter(task -> task.getOwnerId().equals(ownerId) 
+                    && !task.getFinished() 
+                    && !task.getRemoved())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskEntity> findOverdueTasks(LocalDateTime currentTime) {
+        return storage.values().stream()
+                .filter(task -> task.getDueDate().isBefore(currentTime)
                     && !task.getFinished() 
                     && !task.getRemoved())
                 .collect(Collectors.toList());

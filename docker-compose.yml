@@ -59,7 +59,7 @@ services:
     build: .
     container_name: taskmanager-app
     environment:
-      SPRING_PROFILES_ACTIVE: messaging
+      SPRING_PROFILES_ACTIVE: messaging,scheduling
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/taskmanager
       SPRING_DATASOURCE_USERNAME: taskmanager
       SPRING_DATASOURCE_PASSWORD: taskmanager123

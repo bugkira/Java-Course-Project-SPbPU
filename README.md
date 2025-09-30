@@ -287,3 +287,55 @@
 - **Стабильная сборка проекта** 
 
 </details>
+
+<details>
+<summary><b>Step 8: Add Scheduling & Async Tasks</b></summary>
+
+### Цель
+Реализовать периодическую проверку просроченных задач и асинхронную обработку с использованием @Scheduled и @Async
+
+### Реализованные функции
+- **TaskSchedulerService**: сервис с @Scheduled для периодической проверки просроченных задач
+- **AsyncTaskService**: сервис с @Async для фоновой обработки задач
+- **AsyncConfig**: конфигурация для асинхронных задач и планировщика
+- **Overdue Task Detection**: автоматическое обнаружение просроченных задач
+- **Notification Generation**: создание уведомлений для просроченных задач
+- **Profiles**: отдельный профиль scheduling для планировщика
+- **Actuator Integration**: мониторинг через Spring Boot Actuator
+
+### Архитектура
+- **@Scheduled методы**: 
+  - `checkOverdueTasks()` - каждый час
+  - `checkOverdueTasksBusinessHours()` - каждые 30 минут в рабочие часы (9-18, ПН-ПТ)
+  - `dailyCleanup()` - ежедневно в 2:00
+- **@Async методы**: асинхронная обработка просроченных задач и создание уведомлений
+- **ThreadPoolTaskExecutor**: настроенный пул потоков для асинхронных задач
+- **Overdue Task Repository**: метод `findOverdueTasks()` для поиска просроченных задач
+- **Error Handling**: обработка ошибок в асинхронных методах
+
+### Технологии
+- Spring Boot Starter Actuator для мониторинга
+- Spring Scheduling (@Scheduled, @EnableScheduling)
+- Spring Async (@Async, @EnableAsync)
+- ThreadPoolTaskExecutor для управления потоками
+- Cron expressions для планирования задач
+- Comprehensive unit и integration тесты
+
+### Тестирование
+- **AsyncTaskServiceTest**: unit тесты асинхронного сервиса
+- **TaskSchedulerServiceTest**: unit тесты планировщика
+- **TaskSchedulerIntegrationTest**: интеграционные тесты с реальной базой данных
+- **Overdue Task Detection**: тестирование поиска просроченных задач
+- **Notification Creation**: тестирование создания уведомлений
+
+### Результат
+- **Автоматическая проверка просроченных задач** каждый час
+- **Бизнес-часы мониторинг** каждые 30 минут в рабочие дни
+- **Асинхронная обработка** для улучшения производительности
+- **Автоматическое создание уведомлений** для просроченных задач
+- **Spring Boot Actuator** для мониторинга планировщика
+- **Профиль scheduling** для активации планировщика
+- **Comprehensive тестирование** всех компонентов
+- **Docker Compose** с поддержкой планировщика
+
+</details>

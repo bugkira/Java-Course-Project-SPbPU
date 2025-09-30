@@ -23,6 +23,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-amqp' // Added for RabbitMQ messaging
+	implementation 'org.springframework.boot:spring-boot-starter-actuator' // Added for monitoring and health checks
 	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.flywaydb:flyway-database-postgresql'
 	implementation 'com.h2database:h2'
@@ -57,7 +58,7 @@ dockerCompose {
 	removeOrphans = true
 	
 	// Environment variables for tests
-	environment.put 'SPRING_PROFILES_ACTIVE', 'messaging'
+	environment.put 'SPRING_PROFILES_ACTIVE', 'messaging,scheduling'
 	environment.put 'SPRING_DATASOURCE_URL', 'jdbc:postgresql://localhost:5433/taskmanager'
 	environment.put 'SPRING_DATASOURCE_USERNAME', 'taskmanager'
 	environment.put 'SPRING_DATASOURCE_PASSWORD', 'taskmanager123'

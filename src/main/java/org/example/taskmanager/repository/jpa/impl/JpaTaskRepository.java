@@ -1,5 +1,6 @@
 package org.example.taskmanager.repository.jpa.impl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,15 +31,20 @@ public class JpaTaskRepository implements TaskDataRepository {
     }
     
     @Override
+    public List<TaskEntity> findOverdueTasks(LocalDateTime currentTime) {
+        return jpaRepository.findOverdueTasks(currentTime);
+    }
+
+    @Override
     public Optional<TaskEntity> findByIdAndOwnerId(Long id, Long ownerId) {
         return jpaRepository.findByIdAndOwnerId(id, ownerId);
     }
-    
+
     @Override
     public TaskEntity save(TaskEntity task) {
         return jpaRepository.save(task);
     }
-    
+
     @Override
     public void deleteById(Long id) {
         jpaRepository.deleteById(id);
