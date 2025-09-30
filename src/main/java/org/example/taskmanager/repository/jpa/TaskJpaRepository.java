@@ -1,5 +1,6 @@
 package org.example.taskmanager.repository.jpa;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,4 +30,10 @@ public interface TaskJpaRepository extends JpaRepository<TaskEntity, Long> {
      */
     @Query("SELECT t FROM TaskEntity t WHERE t.id = :id AND t.ownerId = :ownerId")
     Optional<TaskEntity> findByIdAndOwnerId(@Param("id") Long id, @Param("ownerId") Long ownerId);
+    
+    /**
+     * Find all overdue tasks (due date is before current time, not finished, not removed)
+     */
+    @Query("SELECT t FROM TaskEntity t WHERE t.dueDate < :currentTime AND t.finished = false AND t.removed = false")
+    List<TaskEntity> findOverdueTasks(@Param("currentTime") LocalDateTime currentTime);
 }
